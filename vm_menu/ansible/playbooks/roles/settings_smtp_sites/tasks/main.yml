@@ -12,6 +12,7 @@
         mode: '0755'
 
 - name: Adding SMTP settings the site {{ site }}
+  when: is_actions_account is defined and is_actions_account == 'Y'
   block:
     - name: Installing MSMTP
       ansible.builtin.apt:
@@ -34,6 +35,7 @@
         dest: /etc/msmtprc
         state: link
         force: true
+        mode: '0644'
 
     - name: Creating log file
       ansible.builtin.lineinfile:
@@ -74,11 +76,13 @@
       ansible.builtin.copy:
         content: "{{ new_msmtprc_content }}"
         dest: "{{ smtp_file_sites_config }}"
+        mode: '0644'
 
     - name: Add new block configuration in SMTP config file
       ansible.builtin.blockinfile:
         marker: ''
         path: "{{ smtp_file_sites_config }}"
+        mode: '0644'
         block: |
           # smtp auto managed account {{ account_name }}
           account {{ account_name }}
@@ -109,10 +113,6 @@
           tls_certcheck off
           tls_starttls off
         insertafter: EOF
-
-
-
-  when: is_actions_account is defined and is_actions_account == 'Y'
 
 - block:
     - name: Read the current content of the file
