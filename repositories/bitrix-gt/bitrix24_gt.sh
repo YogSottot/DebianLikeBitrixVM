@@ -581,6 +581,8 @@ then
 	#debconf-set-selections <<< 'exim4-config exim4/dc_eximconfig_configtype select internet site; mail is sent and received directly using SMTP'
 	echo -e "[client]\npassword=${mypwd}" > /root/.my.cnf
 
+	echo -e "\n127.0.0.1 push httpd\n" >> /etc/hosts
+
 	if [ -f /etc/lsb-release ] && grep -q "Ubuntu" /etc/lsb-release; then
     # Ubuntu-specific command
     add-apt-repository ppa:ondrej/php
