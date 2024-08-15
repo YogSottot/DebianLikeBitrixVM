@@ -290,7 +290,7 @@ fpmsetup() {
 		php_value[session.save_handler] = files
 		php_value[session.save_path]    = /var/lib/php/session
 		php_value[soap.wsdl_cache_dir]  = /var/lib/php/wsdlcache
-		env[BITRIX_ENV_TYPE]=crm
+		env[BITRIX_ENV_TYPE]=general
 	EOF
 }
 
@@ -539,7 +539,7 @@ then
 	dbconn > bitrix/php_interface/dbconn.php
 	settings > bitrix/.settings.php
 	rediscnf > ${rediscnf}
-	sed -i 's/general/crm/' /etc/httpd/bx/conf/00-environment.conf
+	#sed -i 's/general/crm/' /etc/httpd/bx/conf/00-environment.conf
 	echo "env[BITRIX_VA_VER]=${envver}" > /etc/php-fpm.d/bx
 	phpsetup >> ${phpini}
 	fpmsetup 'apache' > ${phpfpmcnf}
@@ -636,7 +636,7 @@ then
 	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
 
 	echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf}
-	sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf
+	#sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf
 	sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf
 	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
 
