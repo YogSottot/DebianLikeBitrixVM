@@ -47,11 +47,28 @@ apt install -y perl wget curl ansible git ssl-cert cron locales locales-all popp
 
 # Set locales
 locale-gen en_US.UTF-8
+locale-gen en_GB.UTF-8
+locale-gen en_DK.UTF-8
+locale-gen ru_RU.UTF-8
+locale-gen C.UTF-8
 
-bash -c 'echo "LANG=en_US.UTF-8" > /etc/default/locale'
-bash -c 'echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale'
-
-bash -c 'echo "LC_ALL=\"en_US.UTF-8\"" >> /etc/environment'
+cat > /etc/default/locale <<CONFIG_LOCALE
+LANG=en_GB.UTF-8
+LANGUAGE=
+LC_CTYPE="en_GB.UTF-8"
+LC_NUMERIC="ru_RU.UTF-8"
+LC_TIME="en_DK.UTF-8"
+LC_COLLATE="ru_RU.UTF-8"
+LC_MONETARY="C.UTF-8"
+LC_MESSAGES="en_GB.UTF-8"
+LC_PAPER="ru_RU.UTF-8"
+LC_NAME="ru_RU.UTF-8"
+LC_ADDRESS="ru_RU.UTF-8"
+LC_TELEPHONE="en_GB.UTF-8"
+LC_MEASUREMENT="C.UTF-8"
+LC_IDENTIFICATION="ru_RU.UTF-8"
+LC_ALL=
+CONFIG_LOCALE
 
 source /etc/default/locale
 export LC_ALL="en_US.UTF-8"

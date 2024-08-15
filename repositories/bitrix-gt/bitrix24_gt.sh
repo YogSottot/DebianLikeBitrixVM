@@ -370,7 +370,8 @@ cronagent(){
 
 dplPush(){
 	cd /opt
-	wget -q https://repo.bitrix.info/vm/push-server-0.3.0.tgz
+	#wget -q https://repo.bitrix.info/vm/push-server-0.3.0.tgz
+	wget -q https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/repositories/bitrix-gt/push-server-0.3.0.tgz
 	npm install --production ./push-server-0.3.0.tgz
 	rm ./push-server-0.3.0.tgz
 	ln -sf /opt/node_modules/push-server/etc/push-server /etc/push-server
@@ -529,7 +530,7 @@ then
 	mkdir -p /var/www/html/bx-site
 	cd /var/www/html/bx-site
 	# wget -qO- http://rep.fvds.ru/cms/bitrixstable.tgz|tar -zxp
-	wget -qO- https://raw.githubusercontent.com/YogSottot/bitrix-gt/master/bitrixstable.tgz|tar -zxp
+	wget -qO- https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/repositories/bitrix-gt/bitrixstable.tgz|tar -zxp
 	mv -f ./bitrixenv_error /var/www/
 	mv -f ./nginx/* /etc/nginx/
 	rm -rf /etc/httpd/{conf,conf.d,conf.modules.d}
@@ -608,7 +609,7 @@ then
 	mkdir -p /var/www/html/bx-site
 	cd /var/www/html/bx-site
 	# wget -qO- http://rep.fvds.ru/cms/bitrixstable.tgz|tar -zxp
-	wget -qO- https://github.com/YogSottot/DebianLikeBitrixVM/raw/master/repositories/bitrix-gt/bitrixstable.tgz|tar -zxp
+	wget -qO- https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/repositories/bitrix-gt/bitrixstable.tgz|tar -zxp
 	mv -f ./bitrixenv_error /var/www/
 
 	mkdir -p bitrix/php_interface
