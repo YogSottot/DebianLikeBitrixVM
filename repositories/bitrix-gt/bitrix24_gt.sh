@@ -580,8 +580,15 @@ then
 	#debconf-set-selections <<< 'exim4-config exim4/dc_eximconfig_configtype select internet site; mail is sent and received directly using SMTP'
 	echo -e "[client]\npassword=${mypwd}" > /root/.my.cnf
 
-	wget -qO /etc/apt/trusted.gpg.d/php.gpg https://ftp.mpi-inf.mpg.de/mirrors/linux/mirror/deb.sury.org/repositories/php/apt.gpg
-	echo "#deb https://ftp.mpi-inf.mpg.de/mirrors/linux/mirror/deb.sury.org/repositories/php ${release} main" > /etc/apt/sources.list.d/php.list
+	if [ -f /etc/lsb-release ] && grep -q "Ubuntu" /etc/lsb-release; then
+    # Ubuntu-specific command
+    add-apt-repository ppa:ondrej/php
+	elif [ -f /etc/debian_version ]; then
+    # Debian-specific commands
+    wget -qO /etc/apt/trusted.gpg.d/php.gpg https://mirror.yandex.ru/mirrors/packages.sury.org/php/apt.gpg
+    echo "deb https://mirror.yandex.ru/mirrors/packages.sury.org/php ${release} main" > /etc/apt/sources.list.d/sury_php.list
+	fi
+	
 	apt update
 	apt install -y php8.2-common php8.2-cli php8.2-dev php8.2-fpm libpcre3-dev php8.2-gd php8.2-curl php8.2-imap php8.2-opcache php8.2-xml php8.2-mbstring php8.2-apcu php8.2-sqlite3 php8.2-bcmath php8.2-mcrypt php8.2-memcache php8.2-imagick php8.2-zip php8.2-soap php8.2-ldap php8.2-pspell php8.2-intl php-pear php8.2-mysqli \
 		mariadb-server mysql-common mariadb-client \
