@@ -5,10 +5,10 @@ set -euo pipefail
 # MASTER branch
 
 # use curl
-# bash <(curl -sL https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/master/install_full_environment.sh)
+# bash <(curl -sL https://raw.githubusercontent.com/EduardRe/YogSottot/master/install_full_environment.sh)
 
 # use wget
-# bash <(wget -qO- https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/master/install_full_environment.sh)
+# bash <(wget -qO- https://raw.githubusercontent.com/EduardRe/YogSottot/master/install_full_environment.sh)
 
 cat > /root/temp_install_full_environment.sh <<\END
 #!/usr/bin/env bash
@@ -29,9 +29,9 @@ generate_password() {
     echo $password
 }
 
-BRANCH="master"
-SETUP_BITRIX_DEBIAN_URL="https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/$BRANCH/repositories/bitrix-gt/custom_from_install_full_environment_bitrix_setup_vanilla.sh"
-REPO_URL="https://github.com/EduardRe/DebianLikeBitrixVM.git"
+BRANCH="feature/php-fpm"
+SETUP_BITRIX_DEBIAN_URL="https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/$BRANCH/repositories/bitrix-gt/bitrix24_gt.sh"
+REPO_URL="https://github.com/YogSottot/DebianLikeBitrixVM"
 
 DB_NAME="bitrix"
 DB_USER="bitrix"
@@ -102,20 +102,57 @@ fi
 INSTALL_MENU
 fi
 
-# Enable mod_remoteip
+# Configure apache2 modules
 a2enmod remoteip
+a2enmod rewrite
+a2enmod setenvif
+a2dismod ssl
 
 cat > /etc/apache2/mods-enabled/remoteip.conf <<CONFIG_APACHE2_REMOTEIP
 <IfModule remoteip_module>
- RemoteIPHeader X-Forwarded-For
- RemoteIPInternalProxy 127.0.0.1
+  RemoteIPHeader X-Real-IP
+  RemoteIPInternalProxy 127.0.0.1
 </IfModule>
 CONFIG_APACHE2_REMOTEIP
+
+cat > /etc/apache2/conf-enabled/php.conf <<CONFIG_APACHE2_FASTCGI
+      #
+      # The following lines prevent .user.ini files from being viewed by Web clients.
+      #
+      <Files ".user.ini">
+          <IfModule mod_authz_core.c>
+              Require all denied
+          </IfModule>
+          <IfModule !mod_authz_core.c>
+              Order allow,deny
+              Deny from all
+              Satisfy All
+          </IfModule>
+      </Files>
+
+      # Cause the PHP interpreter to handle files with a .php extension.
+      <FilesMatch "\.php$">
+      #        SetHandler "proxy:fcgi://127.0.0.1:9000"
+              SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
+      #       AddType application/x-httpd-php .php
+      </FilesMatch>
+
+      # Add index.php to the list of files that will be served as directory
+      # indexes.
+
+      DirectoryIndex index.php
+
+      # Uncomment the following line to allow PHP to pretty-print .phps
+      # files as PHP source code:
+      #
+      #AddType application/x-httpd-php-source .phps
+CONFIG_APACHE2_FASTCGI
 
 # set PHP 8.2
 update-alternatives --set php /usr/bin/php8.2
 update-alternatives --set phar /usr/bin/phar8.2
 update-alternatives --set phar.phar /usr/bin/phar.phar8.2
+update-alternatives --set php-fpm.sock /run/php/php8.2-fpm.sock
 
 
 ln -s $FULL_PATH_MENU_FILE "$DEST_DIR_MENU/menu.sh"

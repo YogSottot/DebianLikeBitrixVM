@@ -8,7 +8,7 @@
 # description_en: Bitrix CMS installing recipe
 # metadata_end
 #
-
+# date: 08 Jul 2024
 # use
 # bash <(curl -sL https://raw.githubusercontent.com/YogSottot/bitrix-gt/master/bitrix24_gt.sh)
 
@@ -163,7 +163,7 @@ settings() {
 		      'log' => array (
 			  'settings' =>
 			  array (
-			    'file' => '/var/log/php/exceptions.log',
+			    'file' => '__phpexceptions.log',
 			    'log_size' => 1000000,
 			),
 		      ),
@@ -196,7 +196,7 @@ settings() {
 		  ),
 		'pull_s1' => 'BEGIN GENERATED PUSH SETTINGS. DON\'T DELETE COMMENT!!!!',
 		  'pull' => Array(
-		    'value' =>  array(
+			'value' =>  array(
 			'path_to_listener' => "http://#DOMAIN#/bitrix/sub/",
 			'path_to_listener_secure' => "https://#DOMAIN#/bitrix/sub/",
 			'path_to_modern_listener' => "http://#DOMAIN#/bitrix/sub/",
@@ -228,17 +228,17 @@ phpsetup(){
 		;###Bitrix optimize
 		date.timezone=Europe/Moscow
 		short_open_tag = 1
-		max_input_vars=10000
+		max_input_vars=100000
 		mbstring.func_overload=0
 		mbstring.internal_encoding=utf-8
-		upload_max_filesize=64M
-		post_max_size=64M
+		upload_max_filesize=1024M
+		post_max_size=1024M
 		opcache.max_accelerated_files=100000
 		realpath_cache_size=4096k
-		memory_limit = 512M
+		memory_limit = 256M
 		pcre.jit = 0
 		opcache.revalidate_freq = 0
-		max_execution_time=120
+		max_execution_time=300
 	EOF
 }
 
@@ -276,10 +276,10 @@ fpmsetup() {
 		[www]
 		user = $1
 		group = $1
-		listen = 127.0.0.1:9000
+		listen = /run/php/php8.2-fpm.sock
 		listen.allowed_clients = 127.0.0.1
 		pm = dynamic
-		pm.max_children = 12
+		pm.max_children = 15
 		pm.start_servers = 2
 		pm.min_spare_servers = 2
 		pm.max_spare_servers = 5
@@ -364,8 +364,7 @@ rediscnf() {
 cronagent(){
 	local user=${1}
 	cat <<-EOF
-		*/5 * * * * ${user} /usr/bin/php /var/www/html/bitrix/modules/main/tools/cron_events.php >/dev/null 2>&1
-		0 * * * * root envver=\$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./') && touch /etc/php-fpm.d/bx && echo "env[BITRIX_VA_VER]=\${envver}" > /etc/php-fpm.d/bx && systemctl reload php-fpm && sed -i "/BITRIX_VA_VER/d;\\\$a SetEnv BITRIX_VA_VER \${envver}" /etc/httpd/bx/conf/00-environment.conf && systemctl reload httpd
+		* * * * * ${user} /usr/bin/php /var/www/html/bx-site/bitrix/modules/main/tools/cron_events.php >/dev/null 2>&1
 	EOF
 }
 
@@ -413,6 +412,16 @@ apacheCnf() {
 EOF
 }
 
+firewalld(){
+	systemctl restart firewalld
+	systemctl enable firewalld.service
+	firewall-cmd --permanent --zone=public --add-port=80/tcp
+	firewall-cmd --permanent --zone=public --add-port=443/tcp
+	firewall-cmd --permanent --zone=public --add-port=8893/tcp
+	firewall-cmd --permanent --zone=public --add-port=8894/tcp
+	firewall-cmd --permanent --zone=public --add-port=22/tcp
+	firewall-cmd --reload
+}
 nfTabl(){
 	cat <<EOF > /etc/nftables.conf
 #!/usr/sbin/nft -f
@@ -428,7 +437,7 @@ table inet filter {
 		ip6 nexthdr ipv6-icmp limit rate 4/second accept
 		ct state { established, related } accept comment "Accept traffic originated from us"
 		tcp dport 22 accept comment "ssh"
-		tcp dport { 80, 443 } accept comment "web"
+		tcp dport { 80, 443, 8893, 8894 } accept comment "web"
 	}
 	chain forward {
 		type filter hook forward priority 0;
@@ -517,9 +526,11 @@ then
 	chown mysql /var/run/mariadb
 	echo 'd /var/run/mariadb 0775 mysql -' > /etc/tmpfiles.d/mariadb.conf
 	[ $release -eq 7 ] && (firewall-cmd --zone=public --add-port=80/tcp --add-port=443/tcp --add-port=21/tcp --add-port=8893/tcp --permanent && firewall-cmd --reload) || (iptables -I INPUT 1 -p tcp -m multiport --dports 21,80,443 -j ACCEPT && iptables-save > /etc/sysconfig/iptables)
-	cd /var/www/html
+	mkdir -p /var/www/html/bx-site
+	cd /var/www/html/bx-site
 	# wget -qO- http://rep.fvds.ru/cms/bitrixstable.tgz|tar -zxp
 	wget -qO- https://raw.githubusercontent.com/YogSottot/bitrix-gt/master/bitrixstable.tgz|tar -zxp
+	mv -f ./bitrixenv_error /var/www/
 	mv -f ./nginx/* /etc/nginx/
 	rm -rf /etc/httpd/{conf,conf.d,conf.modules.d}
 	mv -f ./httpd/* /etc/httpd/
@@ -552,49 +563,54 @@ fi
 if echo $os|grep -Eo 'Debian' >/dev/null
 then
 	apt update
-	apt-get install -y software-properties-common apt-transport-https debconf-utils lsb-release gnupg gnupg2 debian-archive-keyring pwgen make build-essential wget curl
+	apt install -y software-properties-common apt-transport-https debconf-utils lsb-release gnupg gnupg2 debian-archive-keyring pwgen wget curl
 	type=$(lsb_release -is|tr '[A-Z]' '[a-z]')
 	release=$(lsb_release -sc|tr '[A-Z]' '[a-z]')
-	mkdir -p /etc/apt/keyrings
-	curl -o /etc/apt/keyrings/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
-	echo "deb [signed-by=/etc/apt/keyrings/mariadb-keyring.pgp] https://mirror.docker.ru/mariadb/repo/11.3/$type $release main" > /etc/apt/sources.list.d/mariadb.list
-	wget -q -O - https://nginx.org/keys/nginx_signing.key | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
-	gpg --dry-run --quiet --no-keyring --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg
-	cat <<-EOF > /etc/apt/sources.list.d/nginx.list
-		deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/${type}/ ${release} nginx
-	EOF
+	#mkdir -p /etc/apt/keyrings
+	#curl -o /etc/apt/keyrings/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
+	#echo "deb [signed-by=/etc/apt/keyrings/mariadb-keyring.pgp] https://mirror.docker.ru/mariadb/repo/11.3/$type $release main" > /etc/apt/sources.list.d/mariadb.list
+	#wget -q -O - https://nginx.org/keys/nginx_signing.key | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+	#gpg --dry-run --quiet --no-keyring --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg
+	#cat <<-EOF > /etc/apt/sources.list.d/nginx.list
+	#	deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/${type}/ ${release} nginx
+	#EOF
 	export DEBIAN_FRONTEND="noninteractive"
-	debconf-set-selections <<< "mariadb-server mysql-server/root_password password ${mypwd}"
-	debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password ${mypwd}"
-	debconf-set-selections <<< 'exim4-config exim4/dc_eximconfig_configtype select internet site; mail is sent and received directly using SMTP'
+	#debconf-set-selections <<< "mariadb-server mysql-server/root_password password ${mypwd}"
+	#debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password ${mypwd}"
+	#debconf-set-selections <<< 'exim4-config exim4/dc_eximconfig_configtype select internet site; mail is sent and received directly using SMTP'
 	echo -e "[client]\npassword=${mypwd}" > /root/.my.cnf
 
 	wget -qO /etc/apt/trusted.gpg.d/php.gpg https://ftp.mpi-inf.mpg.de/mirrors/linux/mirror/deb.sury.org/repositories/php/apt.gpg
-	echo "deb https://ftp.mpi-inf.mpg.de/mirrors/linux/mirror/deb.sury.org/repositories/php ${release} main" > /etc/apt/sources.list.d/php8.2.list
+	echo "#deb https://ftp.mpi-inf.mpg.de/mirrors/linux/mirror/deb.sury.org/repositories/php ${release} main" > /etc/apt/sources.list.d/php.list
 	apt update
-	apt install -y php8.2-opcache php8.2-mysqli php8.2-fpm php8.2-gd php8.2-curl php8.2-xml php8.2-mbstring \
+	apt install -y php8.2-common php8.2-cli php8.2-dev php8.2-fpm libpcre3-dev php8.2-gd php8.2-curl php8.2-imap php8.2-opcache php8.2-xml php8.2-mbstring php8.2-apcu php8.2-sqlite3 php8.2-bcmath php8.2-mcrypt php8.2-memcache php8.2-imagick php8.2-zip php8.2-soap php8.2-ldap php8.2-pspell php8.2-intl php-pear php8.2-mysqli \
 		mariadb-server mysql-common mariadb-client \
-		nginx catdoc exim4 exim4-config apache2 libapache2-mod-rpaf \
-		nodejs npm redis sysfsutils nftables
+		nginx-light catdoc postfix apache2 \
+		nodejs npm redis sysfsutils firewalld
+		#nftables
 	echo 'kernel/mm/transparent_hugepage/enabled = madvise' >> /etc/sysfs.conf
 	systemctl restart sysfsconf
-	sed -i "s/dc_eximconfig_configtype='local'/dc_eximconfig_configtype='internet'/" /etc/exim4/update-exim4.conf.conf && dpkg-reconfigure --frontend noninteractive exim4-config
+	#sed -i "s/dc_eximconfig_configtype='local'/dc_eximconfig_configtype='internet'/" /etc/exim4/update-exim4.conf.conf && dpkg-reconfigure --frontend noninteractive exim4-config
 	ip=$(wget -qO- "https://ipinfo.io/ip")
 	mariadb -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${mypwddb}')"
-	nfTabl
+	#nfTabl
+	firewalld
 	dplRedis
 	dplPush
 
-  cd /var/www/html || exit
+	mkdir -p /var/www/html/bx-site
+	cd /var/www/html/bx-site
 	# wget -qO- http://rep.fvds.ru/cms/bitrixstable.tgz|tar -zxp
-	wget -qO- https://raw.githubusercontent.com/YogSottot/bitrix-gt/master/bitrixstable.tgz|tar -zxp
+	wget -qO- https://github.com/YogSottot/DebianLikeBitrixVM/raw/master/repositories/bitrix-gt/bitrixstable.tgz|tar -zxp
+	mv -f ./bitrixenv_error /var/www/
+
 	mkdir -p bitrix/php_interface
 	dbconn > bitrix/php_interface/dbconn.php
 	settings > bitrix/.settings.php
 
 	mv -f ./httpd/bx /etc/apache2/bx
-	a2dismod mpm_event
-	a2enmod mpm_worker
+	#a2dismod mpm_event
+	#a2enmod mpm_worker
 	a2enmod remoteip
 	a2enmod rewrite
 	a2enmod proxy
@@ -616,14 +632,15 @@ then
 	ln -s /var/lib/php/sessions /var/lib/php/session
 	ln -s /etc/nginx/bx/site_avaliable/push.conf /etc/nginx/bx/site_enabled/
 
-	envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
+	envver=9999.9.9
+	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
 
 	echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf}
 	sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf
 	sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf
 	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
 
-	sed -i 's|user apache|user www-data|' /etc/nginx/nginx.conf
+	#sed -i 's|user apache|user www-data|' /etc/nginx/nginx.conf
 	rm /etc/apache2/sites-enabled/000-default.conf
 
 
