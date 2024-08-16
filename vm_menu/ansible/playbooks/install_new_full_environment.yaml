@@ -2,12 +2,12 @@
 - name: Installing of a new full environment
   hosts: localhost
   connection: local
-  become: yes
-  gather_facts: no
+  become: true
+  gather_facts: false
   vars:
     - bx_temporary_files_directory: "{{ path_sites }}/tmp/{{ domain }}/"
   tasks:
-    - include_tasks: "tasks/add_cron_agents.yaml"
+    - ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
       vars:
         - path_file_run_cron: "{{ document_root }}{{ bx_cron_agents_path_file_after_document_root }}"
         - user_site: "{{ user_server_sites }}"
@@ -16,26 +16,21 @@
         - logs_path_file: "{{ bx_cron_logs_path_file }}"
 
     - name: Creating directory from bitrix temporary files
-      file:
+      ansible.builtin.file:
         state: directory
         path: "{{ bx_temporary_files_directory }}"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_dirs }}"
-        recurse: yes
-
-    - name: Setting timezone to UTC
-      ansible.builtin.command:
-        cmd: timedatectl set-timezone UTC
+        recurse: true
 
     - name: Restarting MySQL service
-      service:
+      ansible.builtin.service:
         name: mariadb
         state: restarted
-      ignore_errors: yes
 
     - name: Creating array for deleting files
-      set_fact:
+      ansible.builtin.set_fact:
         dell_files: "{{ delete_files.split(',') }}"
       no_log: true
 
@@ -46,12 +41,12 @@
       loop: "{{ dell_files }}"
 
     - name: Creating array with urls
-      set_fact:
+      ansible.builtin.set_fact:
         urls: "{{ download_bitrix_install_files_new_site.split(',') }}"
       no_log: true
 
     - name: Downloading Bitrix scripts
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ item }}"
         dest: "{{ document_root }}"
         owner: "{{ user_server_sites }}"
@@ -62,12 +57,12 @@
       with_items: "{{ urls }}"
 
     - name: Creating of downloaded file names array
-      set_fact:
+      ansible.builtin.set_fact:
         file_names_download: "{{ urls | map('basename') | list }}"
       no_log: true
 
     - name: Generating index.html using links of downloaded files
-      template:
+      ansible.builtin.template:
         dest: "{{ document_root }}/index.html"
         src: "roles/create_site/templates/site_full_tpl/index.j2"
         owner: "{{ user_server_sites }}"
@@ -76,7 +71,7 @@
       no_log: true
 
     - name: Creating directory bitrix/php_interface
-      file:
+      ansible.builtin.file:
         state: directory
         path: "{{ document_root }}/bitrix/php_interface"
         owner: "{{ user_server_sites }}"
@@ -84,7 +79,7 @@
         mode: "{{ permissions_sites_dirs }}"
 
     - name: Generating dbconn.php file
-      template:
+      ansible.builtin.template:
         dest: "{{ document_root }}/bitrix/php_interface/dbconn.php"
         src: "roles/create_site/templates/site_full_tpl/dbconn.j2"
         owner: "{{ user_server_sites }}"
@@ -92,7 +87,7 @@
         mode: "{{ permissions_sites_files }}"
 
     - name: Generating .settings.php file
-      template:
+      ansible.builtin.template:
         dest: "{{ document_root }}/bitrix/.settings.php"
         src: "roles/create_site/templates/site_full_tpl/.settings.j2"
         owner: "{{ user_server_sites }}"
@@ -101,7 +96,7 @@
 
     ############## SITE FILES ##############
     - name: Adding .htaccess file
-      copy:
+      ansible.builtin.copy:
         src: "roles/create_site/files/site_files/.htaccess"
         dest: "{{ document_root }}"
         owner: "{{ user_server_sites }}"
@@ -110,109 +105,109 @@
 
     ############## NGINX ##############
     - name: Copying nginx_files directory to /etc/{{ service_nginx_name }}
-      copy:
+      ansible.builtin.copy:
         src: "roles/create_site/files/nginx_files/"
         dest: "/etc/{{ service_nginx_name }}/"
 
     - name: Insert include line into http section of nginx.conf
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "/etc/{{ service_nginx_name }}/nginx.conf"
         marker: "# {mark} ANSIBLE MANAGED BLOCK"
         block: |
-         include custom_conf.d/section_http/*.conf;
+          include custom_conf.d/section_http/*.conf;
         insertafter: "^http\\s*{"
 
     - name: Adding Nginx configuration file
-      template:
+      ansible.builtin.template:
         dest: "{{ path_nginx_sites_conf }}/default.conf"
         src: "roles/create_site/templates/nginx_conf/default.j2"
 
     - name: Creating symbol link (site_enable) for Nginx configuration file
-      file:
+      ansible.builtin.file:
         src: "{{ path_nginx_sites_conf }}/default.conf"
         dest: "{{ path_nginx_sites_enabled }}/default.conf"
         state: link
 
     - name: Adding server block to rtc.conf
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "/etc/{{ service_nginx_name }}/sites-available/rtc.conf"
         block: |
-         server {
-             listen 8893;
-             listen 8894 default_server ssl;
-             server_name _;
+          server {
+              listen 8893;
+              listen 8894 default_server ssl;
+              server_name _;
 
-             access_log off;
-             add_header Access-Control-Allow-Origin *;
+              access_log off;
+              add_header Access-Control-Allow-Origin *;
 
-             # ssl settings
-             include ssl_conf/ssl_default.conf;
+              # ssl settings
+              include ssl_conf/ssl_default.conf;
 
-             # Include error handlers
-             include conf.d/errors.conf;
+              # Include error handlers
+              include conf.d/errors.conf;
 
-             # Include im subscrider handlers
-             include conf.d/im_subscrider.conf;
+              # Include im subscrider handlers
+              include conf.d/im_subscrider.conf;
 
-             location /         { deny all; }
-         }
+              location /         { deny all; }
+          }
         insertafter: EOF
 
 # Fix bug, dont start NGINX after reboot system
 
     - name: Creating directory for override.conf
-      file:
+      ansible.builtin.file:
         path: "/etc/systemd/system/{{ service_nginx_name }}.service.d"
         state: directory
         mode: '0755'
 
     - name: Create and write to override.conf
-      copy:
+      ansible.builtin.copy:
         dest: "/etc/systemd/system/{{ service_nginx_name }}.service.d/override.conf"
         content: |
-         [Unit]
-         Requires=apache2.service
-         After=network-online.target remote-fs.target nss-lookup.target apache2.service
-         Wants=network-online.target apache2.service
+          [Unit]
+          Requires=apache2.service
+          After=network-online.target remote-fs.target nss-lookup.target apache2.service
+          Wants=network-online.target apache2.service
 
-         [Service]
-         StartLimitBurst=50
-         StartLimitIntervalSec=500
-         RestartSec=1s
-         Restart=on-failure
+          [Service]
+          StartLimitBurst=50
+          StartLimitIntervalSec=500
+          RestartSec=1s
+          Restart=on-failure
         mode: '0644'
 
     - name: Reload systemd to apply changes
-      command: systemctl daemon-reload
+      ansible.builtin.command: systemctl daemon-reload
 
 # END fix bug, dont start NGINX after reboot system
 
     - name: Restarting Nginx
-      systemd:
+      ansible.builtin.systemd:
         name: "{{ service_nginx_name }}"
         state: restarted
 
 
     ############## APACHE ##############
     - name: Adding Apache configuration file
-      template:
+      ansible.builtin.template:
         dest: "{{ path_apache_sites_conf }}/default.conf"
         src: "roles/create_site/templates/apache_conf/default.j2"
 
     - name: Creating symbol link (site_enable) for Apache configuration file
-      file:
+      ansible.builtin.file:
         src: "{{ path_apache_sites_conf }}/default.conf"
         dest: "{{ path_apache_sites_enabled }}/default.conf"
         state: link
 
     - name: Restarting Apache
-      systemd:
+      ansible.builtin.systemd:
         name: "{{ service_apache_name }}"
         state: restarted
 
     ############## Show IP address ##############
     - name: Creating script
-      copy:
+      ansible.builtin.copy:
         dest: /usr/local/bin/display-ip.sh
         content: |
           #!/bin/bash
@@ -223,54 +218,54 @@
         mode: '0755'
 
     - name: Creating systemd service for IP showing
-      copy:
+      ansible.builtin.copy:
         dest: /etc/systemd/system/display-ip@.service
         content: |
-         [Unit]
-         Description=Show IP address on tty%I
-         After=network-online.target multi-user.target
-         Wants=network-online.target multi-user.target
+          [Unit]
+          Description=Show IP address on tty%I
+          After=network-online.target multi-user.target
+          Wants=network-online.target multi-user.target
 
-         [Service]
-         ExecStart=/usr/local/bin/display-ip.sh
-         StandardOutput=tty
-         TTYPath=/dev/tty%I
-         Type=simple
+          [Service]
+          ExecStart=/usr/local/bin/display-ip.sh
+          StandardOutput=tty
+          TTYPath=/dev/tty%I
+          Type=simple
 
-         [Install]
-         WantedBy=getty.target
+          [Install]
+          WantedBy=getty.target
         mode: '0644'
 
     - name: Create directory for getty@.service override
-      file:
+      ansible.builtin.file:
         path: /etc/systemd/system/getty@tty1.service.d
         state: directory
         mode: '0755'
 
     - name: Override getty@.service to use display-ip.sh
-      copy:
+      ansible.builtin.copy:
         dest: /etc/systemd/system/getty@tty1.service.d/override.conf
         content: |
-         [Service]
-         ExecStartPost=/usr/local/bin/display-ip.sh
+          [Service]
+          ExecStartPost=/usr/local/bin/display-ip.sh
         mode: '0644'
 
     - name: Reload systemd daemon
-      command: systemctl daemon-reload
+      ansible.builtin.command: systemctl daemon-reload
 
     - name: Restart getty@tty1.service
-      systemd:
+      ansible.builtin.systemd:
         name: getty@tty1
         state: restarted
 
 # Change site user for connection SSH
     - name: Installing of python3-passlib
-      apt:
+      ansible.builtin.apt:
         name: python3-passlib
         state: present
 
     - name: Creating home directory for user {{ user_server_sites }}
-      file:
+      ansible.builtin.file:
         path: "/home/{{ user_server_sites }}"
         state: directory
         owner: "{{ user_server_sites }}"
@@ -278,7 +273,7 @@
         mode: '0755'
 
     - name: Creating directory .ssh
-      file:
+      ansible.builtin.file:
         path: "/home/{{ user_server_sites }}/.ssh"
         state: directory
         owner: "{{ user_server_sites }}"
@@ -286,12 +281,12 @@
         mode: '0700'
 
     - name: Generating SSH key
-      command: ssh-keygen -t rsa -b 2048 -f "/home/{{ user_server_sites }}/.ssh/id_rsa" -N ''
+      ansible.builtin.command: ssh-keygen -t rsa -b 2048 -f "/home/{{ user_server_sites }}/.ssh/id_rsa" -N ''
       args:
         creates: "/home/{{ user_server_sites }}/.ssh/id_rsa"
 
     - name: Copying public key in authorized_keys
-      copy:
+      ansible.builtin.copy:
         src: "/home/{{ user_server_sites }}/.ssh/id_rsa.pub"
         dest: "/home/{{ user_server_sites }}/.ssh/authorized_keys"
         owner: "{{ user_server_sites }}"
@@ -299,31 +294,31 @@
         mode: '0600'
 
     - name: Change the rights to the directory
-      file:
+      ansible.builtin.file:
         path: "/home/{{ user_server_sites }}"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         recurse: yes
 
     - name: Change user {{ user_server_sites }} for connecting SSH
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/passwd
         regexp: "^{{ user_server_sites }}:"
         line: "{{ user_server_sites }}:x:33:33:{{ group_user_server_sites }}:{{ path_sites }}:/bin/bash"
         state: present
 
     - name: Setting password from user {{ user_server_sites }}
-      user:
+      ansible.builtin.user:
         name: "{{ user_server_sites }}"
         password: "{{ site_user_password | password_hash('sha512', 'passlib') }}"
 
     - name: Link creating
-      file:
+      ansible.builtin.file:
         src: "/home/{{ user_server_sites }}/.ssh"
         dest: "{{ path_sites }}/.ssh"
         state: link
 
-    - include_tasks: "tasks/change_owner_and_group_symbolic_links.yaml"
+    - ansible.builtin.include_tasks: "tasks/change_owner_and_group_symbolic_links.yaml"
       vars:
         path_links:
           - ".ssh"

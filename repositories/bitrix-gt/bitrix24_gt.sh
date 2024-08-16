@@ -658,7 +658,7 @@ then
 	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
 
 	systemctl restart cron mysql php8.2-fpm apache2 nginx php8.2-fpm redis-server push-server
-	systemctl enable cron mysql php8.2-fpm apache2 nginx php8.2-fpm push-server sysfsconf.service
+	systemctl enable cron mysql php8.2-fpm apache2 nginx php8.2-fpm push-server
 fi
 
 ip=$(wget -qO- "https://ipinfo.io/ip")
