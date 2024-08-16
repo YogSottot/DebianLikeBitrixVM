@@ -14,7 +14,7 @@
 
 cat > /root/run.sh <<\END
 
-#set -x
+set -x
 LOG_PIPE=/tmp/log.pipe
 mkfifo ${LOG_PIPE}
 LOG_FILE=/root/recipe.log
@@ -660,10 +660,6 @@ then
 	systemctl restart cron mysql php8.2-fpm apache2 nginx php8.2-fpm redis-server push-server
 	systemctl enable cron mysql php8.2-fpm apache2 nginx php8.2-fpm push-server
 fi
-
-ip=$(wget -qO- "https://ipinfo.io/ip")
-echo 'gt smart' > /env
-curl -s "http://${ip}/"|grep 'bitrixsetup' >/dev/null || exit 1
 
 END
 

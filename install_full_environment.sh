@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set +x
-set -uo pipefail
+set -euo pipefail
 # Install full environment
 # MASTER branch
 
@@ -13,7 +13,7 @@ set -uo pipefail
 cat > /root/temp_install_full_environment.sh <<\END
 #!/usr/bin/env bash
 set +x
-set -uo pipefail
+set -euo pipefail
 
 generate_password() {
     local length=$1
