@@ -65,7 +65,6 @@ LogLevel warn
 	<Directory {{ path_sites }}/{{ domain }}/upload>
 		AllowOverride none
 		AddType text/plain php,php3,php4,php5,php6,phtml,pl,asp,aspx,cgi,dll,exe,ico,shtm,shtml,fcg,fcgi,fpl,asmx,pht
-		php_value engine off
 	</Directory>
 
 	<Directory {{ path_sites }}/{{ domain }}/upload/support/not_image>
@@ -76,15 +75,11 @@ LogLevel warn
 	<Directory {{ path_sites }}/{{ domain }}/bitrix/images>
 		AllowOverride none
 		AddType text/plain php,php3,php4,php5,php6,phtml,pl,asp,aspx,cgi,dll,exe,ico,shtm,shtml,fcg,fcgi,fpl,asmx,pht
-		php_value engine off
 	</Directory>
 
 	<Directory {{ path_sites }}/{{ domain }}/bitrix/tmp>
 		AllowOverride none
 		AddType text/plain php,php3,php4,php5,php6,phtml,pl,asp,aspx,cgi,dll,exe,ico,shtm,shtml,fcg,fcgi,fpl,asmx,pht
-		php_value engine off
 	</Directory>
-
-    php_admin_value sendmail_path "{{ smtp_path_wrapp_script_sh }} {{ domain }}"
 
 </VirtualHost>

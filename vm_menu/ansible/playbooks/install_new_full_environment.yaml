@@ -5,7 +5,7 @@
   become: true
   gather_facts: false
   vars:
-    - bx_temporary_files_directory: "{{ path_sites }}/tmp/{{ domain }}/"
+    - bx_temporary_files_directory: "{{ path_sites }}/.bx_temp/{{ domain }}/"
   tasks:
     - ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
       vars:
@@ -104,10 +104,25 @@
         mode: "{{ permissions_sites_files }}"
 
     ############## NGINX ##############
+    - name: Generate ssl-cert adn dhparam
+      ansible.builtin.include_tasks: "tasks/ssl_selfsigned.yaml"
+
+    - name: Get Nginx version
+      ansible.builtin.command: nginx -v
+      register: nginx_version_output
+      changed_when: false
+
+    - name: Extract Nginx version number
+      ansible.builtin.set_fact:
+        nginx_version: "{{ nginx_version_output.stderr | regex_search('\\d+\\.\\d+\\.\\d+') }}"
+
     - name: Copying nginx_files directory to /etc/{{ service_nginx_name }}
       ansible.builtin.copy:
         src: "roles/create_site/files/nginx_files/"
         dest: "/etc/{{ service_nginx_name }}/"
+        owner: root
+        group: root
+        mode: '644'
 
     - name: Insert include line into http section of nginx.conf
       ansible.builtin.blockinfile:
@@ -121,6 +136,9 @@
       ansible.builtin.template:
         dest: "{{ path_nginx_sites_conf }}/default.conf"
         src: "roles/create_site/templates/nginx_conf/default.j2"
+        owner: root
+        group: root
+        mode: '644'
 
     - name: Creating symbol link (site_enable) for Nginx configuration file
       ansible.builtin.file:
@@ -128,59 +146,21 @@
         dest: "{{ path_nginx_sites_enabled }}/default.conf"
         state: link
 
-    - name: Adding server block to rtc.conf
-      ansible.builtin.blockinfile:
-        path: "/etc/{{ service_nginx_name }}/sites-available/rtc.conf"
-        block: |
-          server {
-              listen 8893;
-              listen 8894 default_server ssl;
-              server_name _;
-
-              access_log off;
-              add_header Access-Control-Allow-Origin *;
-
-              # ssl settings
-              include ssl_conf/ssl_default.conf;
-
-              # Include error handlers
-              include conf.d/errors.conf;
-
-              # Include im subscrider handlers
-              include conf.d/im_subscrider.conf;
-
-              location /         { deny all; }
-          }
-        insertafter: EOF
-
-# Fix bug, dont start NGINX after reboot system
-
-    - name: Creating directory for override.conf
+    - name: Adding Nginx site_settings directory
       ansible.builtin.file:
-        path: "/etc/systemd/system/{{ service_nginx_name }}.service.d"
+        path: "{{ path_nginx }}/site_settings/{{ domain }}"
         state: directory
-        mode: '0755'
+        owner: root
+        group: root
+        mode: '755'
 
-    - name: Create and write to override.conf
-      ansible.builtin.copy:
-        dest: "/etc/systemd/system/{{ service_nginx_name }}.service.d/override.conf"
-        content: |
-          [Unit]
-          Requires=apache2.service
-          After=network-online.target remote-fs.target nss-lookup.target apache2.service
-          Wants=network-online.target apache2.service
-
-          [Service]
-          StartLimitBurst=50
-          StartLimitIntervalSec=500
-          RestartSec=1s
-          Restart=on-failure
-        mode: '0644'
-
-    - name: Reload systemd to apply changes
-      ansible.builtin.command: systemctl daemon-reload
-
-# END fix bug, dont start NGINX after reboot system
+    - name: Adding Nginx site_settings file
+      ansible.builtin.template:
+        dest: "{{ path_nginx }}/site_settings/{{ domain }}/bx_temp.conf"
+        src: "roles/create_site/templates/nginx_conf/bx_temp.j2"
+        owner: root
+        group: root
+        mode: '644'
 
     - name: Restarting Nginx
       ansible.builtin.systemd:
@@ -203,59 +183,6 @@
     - name: Restarting Apache
       ansible.builtin.systemd:
         name: "{{ service_apache_name }}"
-        state: restarted
-
-    ############## Show IP address ##############
-    - name: Creating script
-      ansible.builtin.copy:
-        dest: /usr/local/bin/display-ip.sh
-        content: |
-          #!/bin/bash
-          source /root/vm_menu/bash_scripts/utils.sh
-          get_ip_current_server
-          echo -e "\n\n          ${CURRENT_SERVER_IP}\ndebian login:" > /dev/tty1
-
-        mode: '0755'
-
-    - name: Creating systemd service for IP showing
-      ansible.builtin.copy:
-        dest: /etc/systemd/system/display-ip@.service
-        content: |
-          [Unit]
-          Description=Show IP address on tty%I
-          After=network-online.target multi-user.target
-          Wants=network-online.target multi-user.target
-
-          [Service]
-          ExecStart=/usr/local/bin/display-ip.sh
-          StandardOutput=tty
-          TTYPath=/dev/tty%I
-          Type=simple
-
-          [Install]
-          WantedBy=getty.target
-        mode: '0644'
-
-    - name: Create directory for getty@.service override
-      ansible.builtin.file:
-        path: /etc/systemd/system/getty@tty1.service.d
-        state: directory
-        mode: '0755'
-
-    - name: Override getty@.service to use display-ip.sh
-      ansible.builtin.copy:
-        dest: /etc/systemd/system/getty@tty1.service.d/override.conf
-        content: |
-          [Service]
-          ExecStartPost=/usr/local/bin/display-ip.sh
-        mode: '0644'
-
-    - name: Reload systemd daemon
-      ansible.builtin.command: systemctl daemon-reload
-
-    - name: Restart getty@tty1.service
-      ansible.builtin.systemd:
-        name: getty@tty1
         state: restarted
 
 # Change site user for connection SSH
@@ -281,13 +208,13 @@
         mode: '0700'
 
     - name: Generating SSH key
-      ansible.builtin.command: ssh-keygen -t rsa -b 2048 -f "/home/{{ user_server_sites }}/.ssh/id_rsa" -N ''
+      ansible.builtin.command: ssh-keygen -t ed25519 -b 2048 -f "/home/{{ user_server_sites }}/.ssh/ed25519" -N ''
       args:
-        creates: "/home/{{ user_server_sites }}/.ssh/id_rsa"
+        creates: "/home/{{ user_server_sites }}/.ssh/ed25519"
 
     - name: Copying public key in authorized_keys
       ansible.builtin.copy:
-        src: "/home/{{ user_server_sites }}/.ssh/id_rsa.pub"
+        src: "/home/{{ user_server_sites }}/.ssh/ed25519.pub"
         dest: "/home/{{ user_server_sites }}/.ssh/authorized_keys"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
@@ -298,7 +225,7 @@
         path: "/home/{{ user_server_sites }}"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
-        recurse: yes
+        recurse: true
 
     - name: Change user {{ user_server_sites }} for connecting SSH
       ansible.builtin.lineinfile:

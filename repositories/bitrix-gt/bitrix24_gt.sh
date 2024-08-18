@@ -206,7 +206,7 @@ settings() {
 			'path_to_websocket' => "ws://#DOMAIN#/bitrix/subws/",
 			'path_to_websocket_secure' => "wss://#DOMAIN#/bitrix/subws/",
 			'path_to_publish' => 'http://127.0.0.1:8895/bitrix/pub/',
-			'nginx_version' => '4',
+				'nginx_version' => '4',
 			'nginx_command_per_hit' => '100',
 			'nginx' => 'Y',
 			'nginx_headers' => 'N',
@@ -223,22 +223,78 @@ settings() {
 }
 
 phpsetup(){
-	grep -Rl 'opcache.max_accelerated_files' /etc/php*|xargs -I {} sed -i 's/opcache\.max_accelerated_files/;opcache.max_accelerated_files/' "{}" | :
 	cat <<-\EOF
-		;###Bitrix optimize
-		date.timezone=Europe/Moscow
-		short_open_tag = 1
-		max_input_vars=100000
-		mbstring.func_overload=0
-		mbstring.internal_encoding=utf-8
-		upload_max_filesize=1024M
-		post_max_size=1024M
-		opcache.max_accelerated_files=100000
-		realpath_cache_size=4096k
+		; Set parameters required for proper Bitrix engine functioning.
+		; You can redefine parameters specified in this file
+		; by editing /etc/php.d/z_bx_custom_settings.ini
+
+		; Configure error processing
+		;display_errors = Off
+		;display_startup_errors = Off
+		error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED
+
+		; Set some more PHP parameters
+		enable_dl = Off
+		short_open_tag = On
+		allow_url_fopen = On
+		output_buffering = 4096
+
+		; Change default values of important constants
+		max_input_vars = 100000
+		max_file_uploads = 100
+		max_execution_time = 300
+		max_input_time = 300
+		post_max_size = 1024M
+		upload_max_filesize = 1024M
+		pcre.backtrack_limit = 1000000
+		pcre.recursion_limit = 14000
+		realpath_cache_size = 4096k
+		mysql.default_socket = /run/mysqld/mysqld.sock
+		mysqli.default_socket = /run/mysqld/mysqld.sock
+
+		; Security headers
+		mail.add_x_header = Off
+		expose_php = Off
+
+		; Utf-8 support
+		mbstring.internal_encoding = UTF-8
+
+		; Configure PHP sessions
+		session.entropy_length = 128
+		session.entropy_file = /dev/urandom
+		;session.save_path = /tmp/php_sessions/www
+		session.save_handler = files
+		session.cookie_httponly = On
+
+		session.name = PHPSESSID
+		session.cookie_lifetime = 604800
+		session.gc_probability = 1
+		session.gc_divisor = 1000
+		session.gc_maxlifetime = 604800
+
+		; Set directory for temporary files
+		;upload_tmp_dir = /tmp/php_upload/www
+
+		sendmail_path = sendmail -t -i
+		date.timezone = Europe/Moscow
 		memory_limit = 256M
+
+		; opcache
 		pcre.jit = 0
-		opcache.revalidate_freq = 0
-		max_execution_time=300
+		opcache.enable=1
+		opcache.enable_cli=0
+		opcache.memory_consumption=128
+		opcache.interned_strings_buffer=499
+		opcache.max_accelerated_files=100000
+		opcache.max_wasted_percentage=1
+		opcache.validate_timestamps=1
+		opcache.revalidate_path=0
+		opcache.revalidate_freq=0
+		opcache.max_file_size=0
+		opcache.fast_shutdown=1
+		opcache.save_comments=1
+		opcache.load_comments=1
+
 	EOF
 }
 
@@ -253,7 +309,7 @@ mysqlcnf(){
 		query_cache_type = 1
 		query_cache_size=16M
 		query_cache_limit=4M
-		key_buffer_size=256M
+		key_buffer_size=16M
 		join_buffer_size=2M
 		sort_buffer_size=4M
 		tmp_table_size=128M
@@ -264,9 +320,9 @@ mysqlcnf(){
 		transaction-isolation = READ-COMMITTED
 		performance_schema = OFF
 		sql_mode = ""
-		character-set-server=utf8
-		collation-server=utf8_general_ci
-		init-connect="SET NAMES utf8"
+		character-set-server=utf8mb4
+		collation-server=utf8mb4_unicode_ci
+		init-connect="SET NAMES utf8mb4"
 		explicit_defaults_for_timestamp = 1
 	EOF
 }
@@ -377,14 +433,15 @@ dplPush(){
 	ln -sf /opt/node_modules/push-server/etc/push-server /etc/push-server
 
 	cd /opt/node_modules/push-server
+	sed -i 's/sysconfig/default/g' ./push-server/etc/init.d/push-server-multi
 	cp etc/init.d/push-server-multi /usr/local/bin/push-server-multi
-	mkdir /etc/sysconfig
-	cp etc/sysconfig/push-server-multi  /etc/sysconfig/push-server-multi
+	sed -i 's/USER\=bitrix/USER\=www-data/g' etc/sysconfig/push-server-multi
+	cp etc/sysconfig/push-server-multi  /etc/default/push-server-multi
+	sed -i 's/bitrix/www-data/g' etc/push-server/push-server.service
 	cp etc/push-server/push-server.service  /etc/systemd/system/
 	ln -sf /opt/node_modules/push-server /opt/push-server
-	useradd -g www-data bitrix
 
-	cat <<EOF >> /etc/sysconfig/push-server-multi
+	cat <<EOF >> /etc/default/push-server-multi
 GROUP=www-data
 SECURITY_KEY="${cryptokey}"
 RUN_DIR=/tmp/push-server
@@ -393,12 +450,12 @@ WS_HOST=127.0.0.1
 EOF
 	/usr/local/bin/push-server-multi configs pub
 	/usr/local/bin/push-server-multi configs sub
-	echo 'd /tmp/push-server 0770 bitrix www-data -' > /etc/tmpfiles.d/push-server.conf
-	systemd-tmpfiles --remove --create
+	echo 'd /tmp/push-server 0770 www-data www-data -' > /etc/tmpfiles.d/push-server.conf
+	systemd-tmpfiles --create
 	[[ ! -d /var/log/push-server ]] && mkdir /var/log/push-server
-	chown bitrix:www-data /var/log/push-server
+	chown www-data:www-data /var/log/push-server
 
-	sed -i 's|User=.*|User=bitrix|;s|Group=.*|Group=www-data|;s|ExecStart=.*|ExecStart=/usr/local/bin/push-server-multi systemd_start|;s|ExecStop=.*|ExecStop=/usr/local/bin/push-server-multi stop|' /etc/systemd/system/push-server.service
+	sed -i 's|User=.*|User=www-data|;s|Group=.*|Group=www-data|;s|ExecStart=.*|ExecStart=/usr/local/bin/push-server-multi systemd_start|;s|ExecStop=.*|ExecStop=/usr/local/bin/push-server-multi stop|' /etc/systemd/system/push-server.service
 	systemctl daemon-reload
 	systemctl stop push-server
 	systemctl --now enable push-server
@@ -546,7 +603,7 @@ then
 	fpmsetup 'apache' > ${phpfpmcnf}
 	cronagent 'apache' > ${croncnf}
 	mysqlcnf > ${mycnf}
-	ln -s /etc/nginx/bx/site_avaliable/push.conf /etc/nginx/bx/site_enabled/
+	ln -s /etc/nginx/bx/site_avaliable/rtc.conf /etc/nginx/bx/site_enabled/
 	chown -R apache:apache /var/www/html
 	chmod 771 /var/www/html
 
@@ -593,7 +650,7 @@ then
 	fi
 	
 	apt update
-	apt install -y php8.2-common php8.2-cli php8.2-dev php8.2-fpm libpcre3-dev php8.2-gd php8.2-curl php8.2-imap php8.2-opcache php8.2-xml php8.2-mbstring php8.2-apcu php8.2-sqlite3 php8.2-bcmath php8.2-mcrypt php8.2-memcache php8.2-imagick php8.2-zip php8.2-soap php8.2-ldap php8.2-pspell php8.2-intl php-pear php8.2-mysqli \
+	apt install -y php8.2-common php8.2-cli php8.2-dev php8.2-fpm libpcre3-dev php8.2-gd php8.2-curl php8.2-imap php8.2-opcache php8.2-xml php8.2-xmlrpc php8.2-mbstring php8.2-apcu php8.2-sqlite3 php8.2-bcmath php8.2-mcrypt php8.2-memcache php8.2-imagick php8.2-zip php8.2-soap php8.2-ldap php8.2-pspell php8.2-intl php-pear php8.2-mysql \
 		mariadb-server mysql-common mariadb-client \
 		nginx-light catdoc postfix apache2 \
 		nodejs npm redis sysfsutils firewalld
@@ -618,7 +675,7 @@ then
 	dbconn > bitrix/php_interface/dbconn.php
 	settings > bitrix/.settings.php
 
-	mv -f ./httpd/bx /etc/apache2/bx
+	#mv -f ./httpd/bx /etc/apache2/bx
 	#a2dismod mpm_event
 	#a2enmod mpm_worker
 	a2enmod remoteip
@@ -627,7 +684,7 @@ then
 	a2enmod proxy_fcgi
 	ln -s /var/log/apache2 /etc/apache2/logs
 	echo 'Listen 127.0.0.1:8888' > /etc/apache2/ports.conf
-	apacheCnf >> /etc/apache2/apache2.conf
+	#apacheCnf >> /etc/apache2/apache2.conf
 	rm /etc/apache2/bx/conf/bx_apache_site_name_port.conf
 
 	mv -f ./nginx/* /etc/nginx/
@@ -640,7 +697,7 @@ then
 	mysqlcnf > ${mycnf}
 	chown -R www-data:www-data /var/www/html
 	ln -s /var/lib/php/sessions /var/lib/php/session
-	ln -s /etc/nginx/bx/site_avaliable/push.conf /etc/nginx/bx/site_enabled/
+	ln -s /etc/nginx/bx/site_avaliable/rtc.conf /etc/nginx/bx/site_enabled/
 
 	envver=9999.9.9
 	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
@@ -654,7 +711,6 @@ then
 	rm /etc/apache2/sites-enabled/000-default.conf
 
 
-	sed -i 's|collation-server=utf8_general_ci|collation-server=utf8mb4_general_ci|' /etc/mysql/conf.d/z9_bitrix.cnf
 	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
 
 	systemctl restart cron mysql php8.2-fpm apache2 nginx php8.2-fpm redis-server push-server

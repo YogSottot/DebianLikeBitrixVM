@@ -61,25 +61,25 @@ main_menu(){
 
     case $comand in
 
-     "1") show_sites_dirs ;;
-     "2") add_site ;;
-     "3") get_lets_encrypt_certificate ;;
-     "4") enable_or_disable_redirect_http_to_https ;;
-     "5") action_emulate_bitrix_vm ;;
-     "6") change_php_version ;;
-     "7") settings_smtp_sites ;;
-     "8") menu_install_extensions ;;
-     "9") update_server ;;
-     "R") reboot_server ;;
-     "P") power_off_server ;;
-     "DELETE_SITE") delete_site ;;
-     "update_menu") update_menu;;
+      "1") show_sites_dirs ;;
+      "2") add_site ;;
+      "3") get_lets_encrypt_certificate ;;
+      "4") enable_or_disable_redirect_http_to_https ;;
+      "5") action_emulate_bitrix_vm ;;
+      "6") change_php_version ;;
+      "7") settings_smtp_sites ;;
+      "8") menu_install_extensions ;;
+      "9") update_server ;;
+      "R") reboot_server ;;
+      "P") power_off_server ;;
+      "DELETE_SITE") delete_site ;;
+      "update_menu") update_menu;;
 
     0|z)  exit
     ;;
      *)
-     echo "Error unknown command"
-     ;;
+      echo "Error unknown command"
+      ;;
 
     esac
     done
@@ -100,14 +100,14 @@ menu_install_extensions(){
 
     case $comand in
 
-     "1") install_sphinx ;;
-     "2") install_netdata ;;
+      "1") install_sphinx ;;
+      "2") install_netdata ;;
 
     0|z)  main_menu
     ;;
      *)
-     echo "Error unknown command"
-     ;;
+      echo "Error unknown command"
+      ;;
 
     esac
     done
@@ -131,13 +131,13 @@ add_site(){
 
     echo -e "\n   Menu -> Add a site:\n";
     while [[ -z "$domain" ]]; do
-       read_by_def "   Enter site domain (example: example.com): " domain $domain;
-       if [ -z "$domain" ]; then
+      read_by_def "   Enter site domain (example: example.com): " domain $domain;
+      if [ -z "$domain" ]; then
         echo "   Incorrect site domain! Please enter site domain";
-       elif [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $domain " ]]; then
+      elif [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $domain " ]]; then
         domain='';
         echo "   Domain already exists! Please enter another site domain";
-       fi
+      fi
     done
 
     db_name=$(cut -c-$BS_MAX_CHAR_DB_NAME <<< $(echo "db_$domain" | sed 's/-//g' | sed 's/\./_/g' | "${dir_helpers}/perl/translate.pl"))

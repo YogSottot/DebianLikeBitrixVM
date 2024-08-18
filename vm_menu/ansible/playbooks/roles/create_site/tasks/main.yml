@@ -1,7 +1,7 @@
 ---
 # tasks file for create_site
 - name: Create directory of the site {{ domain }}
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ path_sites }}/{{ domain }}"
     owner: "{{ user_server_sites }}"
@@ -13,26 +13,26 @@
   block:
 
     - name: Checking of path existence resources taken from settings
-      stat:
+      ansible.builtin.stat:
         path: "{{ path_site_from_links }}/{{ item }}"
       register: link_source
       with_items: "{{ site_links_resources.split(',') }}"
 
     - name: Link creating
-      file:
+      ansible.builtin.file:
         src: "{{ path_site_from_links }}/{{ item.item }}"
         dest: "{{ path_sites }}/{{ domain }}/{{ item.item }}"
         state: link
       when: item.stat.exists
       with_items: "{{ link_source.results }}"
 
-    - include_tasks: "tasks/change_owner_and_group_symbolic_links.yaml"
+    - ansible.builtin.include_tasks: "tasks/change_owner_and_group_symbolic_links.yaml"
       vars:
         path_links: "{{ site_links_resources.split(',') }}"
         full_path: "{{ path_sites }}/{{ domain }}"
 
     - name: Adding index.php file for a site
-      template:
+      ansible.builtin.template:
         src: "site_link_tpl/index.j2"
         dest: "{{ path_sites }}/{{ domain }}/index.php"
         owner: "{{ user_server_sites }}"
@@ -46,28 +46,28 @@
   block:
 
     - name: Creating array of urls
-      set_fact:
+      ansible.builtin.set_fact:
         urls: "{{ download_bitrix_install_files_new_site.split(',') }}"
       no_log: true
 
     - name: Downloading Bitrix scripts
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ item }}"
         dest: "{{ path_sites }}/{{ domain }}"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
         timeout: "{{ timeout_download_bitrix_install_files_new_site }}"
-      ignore_errors: yes
+      # ignore_errors: true
       with_items: "{{ urls }}"
 
     - name: Creating of downloaded file names array
-      set_fact:
+      ansible.builtin.set_fact:
         file_names_download: "{{ urls | map('basename') | list }}"
       no_log: true
 
     - name: Generating index.html using links of downloaded files
-      template:
+      ansible.builtin.template:
         dest: "{{ path_sites }}/{{ domain }}/index.html"
         src: "site_full_tpl/index.j2"
         owner: "{{ user_server_sites }}"
@@ -76,26 +76,26 @@
       no_log: true
 
     - name: Installing of python3-pymysql
-      apt:
+      ansible.builtin.apt:
         name: python3-pymysql
         state: present
 
     - name: Creating database
-      mysql_db:
+      community.mysql.mysql_db:
         name: "{{ db_name }}"
         state: present
-      ignore_errors: yes
+      # ignore_errors: yes
 
     - name: Creating database user
-      mysql_user:
+      community.mysql.mysql_user:
         name: "{{ db_user }}"
         password: "{{ db_password }}"
         priv: "{{ db_name }}.*:ALL"
         state: present
-      ignore_errors: yes
+      # ignore_errors: yes
 
     - name: Creating directory bitrix/php_interface
-      file:
+      ansible.builtin.file:
         state: directory
         path: "{{ path_sites }}/{{ domain }}/bitrix/php_interface"
         owner: "{{ user_server_sites }}"
@@ -103,7 +103,7 @@
         mode: "{{ permissions_sites_dirs }}"
 
     - name: Generating dbconn.php file
-      template:
+      ansible.builtin.template:
         dest: "{{ path_sites }}/{{ domain }}/bitrix/php_interface/dbconn.php"
         src: "site_full_tpl/dbconn.j2"
         owner: "{{ user_server_sites }}"
@@ -111,7 +111,7 @@
         mode: "{{ permissions_sites_files }}"
 
     - name: Generating .settings.php file
-      template:
+      ansible.builtin.template:
         dest: "{{ path_sites }}/{{ domain }}/bitrix/.settings.php"
         src: "site_full_tpl/.settings.j2"
         owner: "{{ user_server_sites }}"
@@ -119,15 +119,15 @@
         mode: "{{ permissions_sites_files }}"
 
     - name: Creating directory from bitrix temporary files
-      file:
+      ansible.builtin.file:
         state: directory
         path: "{{ bx_temporary_files_directory }}"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_dirs }}"
-        recurse: yes
+        recurse: true
 
-    - include_tasks: "tasks/add_cron_agents.yaml"
+    - ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
       vars:
         - path_file_run_cron: "{{ path_sites }}/{{ domain }}{{ bx_cron_agents_path_file_after_document_root }}"
         - user_site: "{{ user_server_sites }}"
@@ -139,7 +139,7 @@
 
 ############## SITE FILES ##############
 - name: Adding .htaccess file
-  copy:
+  ansible.builtin.copy:
     src: "site_files/.htaccess"
     dest: "{{ path_sites }}/{{ domain }}"
     owner: "{{ user_server_sites }}"
@@ -148,41 +148,62 @@
 
 ############## NGINX ##############
 - name: Copying ssl_default.conf to ssl_{{ domain }}.conf
-  copy:
+  ansible.builtin.copy:
     src: "nginx_files/ssl_conf/ssl_default.conf"
     dest: "/etc/{{ service_nginx_name }}/ssl_conf/ssl_{{ domain }}.conf"
 
 - name: Adding Nginx configuration file
-  template:
+  ansible.builtin.template:
     dest: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
     src: "nginx_conf/site.j2"
+    owner: root
+    group: root
+    mode: '644'
 
 - name: Creating symbol link (site_enable) for Nginx configuration file
-  file:
+  ansible.builtin.file:
     src: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
     dest: "{{ path_nginx_sites_enabled }}/{{ domain }}.conf"
     state: link
 
+- name: Adding Nginx site_settings directory
+  ansible.builtin.file:
+    path: "{{ path_nginx }}/site_settings/{{ domain }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '755'
+
+- name: Adding Nginx site_settings file
+  ansible.builtin.template:
+    dest: "{{ path_nginx }}/site_settings/{{ domain }}/bx_temp.conf"
+    src: "roles/create_site/templates/nginx_conf/bx_temp.j2"
+    owner: root
+    group: root
+    mode: '644'
+
 - name: Restarting Nginx
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ service_nginx_name }}"
     state: restarted
 
 
 ############## APACHE ##############
 - name: Adding Apache configuration file
-  template:
+  ansible.builtin.template:
     dest: "{{ path_apache_sites_conf }}/{{ domain }}.conf"
     src: "apache_conf/site.j2"
+    owner: root
+    group: root
+    mode: '644'
 
 - name: Creating symbol link (site_enable) for Apache configuration file
-  file:
+  ansible.builtin.file:
     src: "{{ path_apache_sites_conf }}/{{ domain }}.conf"
     dest: "{{ path_apache_sites_enabled }}/{{ domain }}.conf"
     state: link
 
 - name: Restarting Apache
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ service_apache_name }}"
     state: restarted
-

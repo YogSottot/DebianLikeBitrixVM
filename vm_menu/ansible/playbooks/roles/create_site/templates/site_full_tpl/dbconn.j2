@@ -17,18 +17,20 @@ define('CACHED_b_site_template', 3600);
 define('CACHED_b_event', 3600);
 define('CACHED_b_agent', 3660);
 define('CACHED_menu', 3600);
+
 define('BX_FILE_PERMISSIONS', {{ permissions_sites_files }});
 define('BX_DIR_PERMISSIONS', {{ permissions_sites_dirs }});
-@umask(~(BX_FILE_PERMISSIONS|BX_DIR_PERMISSIONS)&0777);
+@umask(~BX_DIR_PERMISSIONS);
+
 define('MYSQL_TABLE_TYPE', 'INNODB');
 define('SHORT_INSTALL', true);
 define('VM_INSTALL', true);
+
 define('BX_UTF', true);
+define('BX_CRONTAB_SUPPORT', true);
 define('BX_COMPRESSION_DISABLED', true);
+
 define('BX_DISABLE_INDEX_PAGE', true);
 define('BX_USE_MYSQLI', true);
 define('BX_TEMPORARY_FILES_DIRECTORY', '{{ bx_temporary_files_directory }}');
 
-if(!(defined('CHK_EVENT') && CHK_EVENT === true)){
-   define('BX_CRONTAB_SUPPORT', true);
-}

@@ -36,7 +36,7 @@ return array(
                     'log' => array(
                         'settings' =>
                             array(
-                                'file' => '/var/log/php/exceptions.log',
+                                'file' => '__phpexceptions.log',
                                 'log_size' => 1000000,
                             ),
                     ),
@@ -51,6 +51,16 @@ return array(
                 ),
             'readonly' => true,
         ),
+    'smtp' =>
+    array (
+        'value' =>
+        array (   
+        'enabled' => true,
+        'debug' => false,
+        'log_file' => 'mailer.log',
+        ),
+    'readonly' => true,
+    ),
     'connections' =>
         array(
             'value' =>

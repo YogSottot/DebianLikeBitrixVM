@@ -1,0 +1,9 @@
+location ~* ^/bx_tmp_download/ {
+    internal;
+    rewrite /bx_tmp_download/(.+) /.bx_temp/{{ domain }}/$1 last;
+}
+
+location ~* ^/\.bx_temp/{{ domain }}/ {
+    internal;
+    root /var/www/html/;
+}

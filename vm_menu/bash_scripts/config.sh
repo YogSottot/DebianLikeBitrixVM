@@ -8,9 +8,9 @@ BS_DEFAULT_SITE_NAME="bx-site"
 BS_PATH_DEFAULT_SITE="$BS_PATH_SITES/$BS_DEFAULT_SITE_NAME"
 BS_USER_SERVER_SITES="www-data"
 BS_GROUP_USER_SERVER_SITES="www-data"
-BS_PERMISSIONS_SITES_DIRS="0755"
-BS_PERMISSIONS_SITES_FILES="0644"
-BS_EXCLUDED_DIRS_SITES=("temp" "tmp" "test" ".ssh")
+BS_PERMISSIONS_SITES_DIRS="0775"
+BS_PERMISSIONS_SITES_FILES="0664"
+BS_EXCLUDED_DIRS_SITES=(".bx_temp" "temp" "tmp" "test" ".ssh")
 BS_SITE_LINKS_RESOURCES=("local" "bitrix" "upload" "images")
 BS_DOWNLOAD_BITRIX_INSTALL_FILES_NEW_SITE=(
   "https://www.1c-bitrix.ru/download/scripts/bitrixsetup.php"
@@ -27,9 +27,14 @@ BS_BX_CRON_LOGS_PATH_FILE="agents_cron.log"
 # PHP configs (VER#0.0 - it will be automatically replaced when the version is selected)
 BS_PHP_INSTALL_TEMPLATE=(
   "phpVER#0.0"
+  "phpVER#0.0-bcmath"
   "phpVER#0.0-cli"
   "phpVER#0.0-common"
   "phpVER#0.0-gd"
+  "phpVER#0.0-fpm"
+  "phpVER#0.0-imap"
+  "phpVER#0.0-imagick"
+  "phpVER#0.0-intl"
   "phpVER#0.0-ldap"
   "phpVER#0.0-mbstring"
   "phpVER#0.0-mysql"
@@ -42,7 +47,10 @@ BS_PHP_INSTALL_TEMPLATE=(
   "phpVER#0.0-memcache"
   "phpVER#0.0-zip"
   "phpVER#0.0-pspell"
+  "phpVER#0.0-soap"
+  "phpVER#0.0-sqlite3"
   "phpVER#0.0-xml"
+  "phpVER#0.0-xmlrpc"
   "php-redis"
 )
 
@@ -69,9 +77,9 @@ BS_CHAR_DB_PASSWORD=24
 
 # NGINX configs
 BS_SERVICE_NGINX_NAME="nginx"
-BS_PATH_NGINX="/etc/${BS_SERVICE_NGINX_NAME}"
-BS_PATH_NGINX_SITES_CONF="$BS_PATH_NGINX/sites-available"
-BS_PATH_NGINX_SITES_ENABLED="$BS_PATH_NGINX/sites-enabled"
+BS_PATH_NGINX="/etc/${BS_SERVICE_NGINX_NAME}/bx/"
+BS_PATH_NGINX_SITES_CONF="$BS_PATH_NGINX/sites_available"
+BS_PATH_NGINX_SITES_ENABLED="$BS_PATH_NGINX/sites_enabled"
 
 # Apache configs
 BS_SERVICE_APACHE_NAME="apache2"
@@ -81,7 +89,7 @@ BS_PATH_APACHE_SITES_ENABLED="$BS_PATH_APACHE/sites-enabled"
 
 # Emulation Bitrix VM configs
 BS_VAR_NAME_BVM="BITRIX_VA_VER"
-BS_VAR_VALUE_BVM="99.99.99"
+BS_VAR_VALUE_BVM="9999.99.99"
 BS_VAR_PATH_FILE_BVM="/etc/apache2/envvars"
 
 # SMTP configs

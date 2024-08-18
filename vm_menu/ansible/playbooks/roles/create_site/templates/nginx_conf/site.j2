@@ -10,10 +10,16 @@ server {
     include custom_conf.d/section_listen_http/*.conf;
     include custom_conf.d/section_listen_http_and_https/*.conf;
 
-    proxy_set_header	Host             $host:80;
-    proxy_set_header	X-Real-IP        $remote_addr;
-    proxy_set_header	X-Forwarded-For  $proxy_add_x_forwarded_for;
+    proxy_set_header    X-Forwarded-For    $proxy_add_x_forwarded_for;
+    proxy_set_header    X-Real-IP          $remote_addr;
+    proxy_set_header    Host               $host:80;
+    proxy_set_header    X-Forwarded-Host   $host;
+    proxy_set_header    X-Forwarded-Scheme $scheme;
+    proxy_set_header    X-Forwarded-Proto  $scheme;
+    proxy_set_header    X-Forwarded-Port   $server_port;
     set $is_global_cache  1;
+
+    set $proxyserver	"http://127.0.0.1:8090";
 
     proxy_redirect ~^(http://[^:]+):\d+(/.+)$ $1$2;
     proxy_redirect ~^(https://[^:]+):\d+(/.+)$ $1$2;
@@ -24,13 +30,13 @@ server {
     root "{{ path_sites }}/{{ domain }}";
 
     # Redirect to ssl if need
-    if (-f {{ path_sites }}/{{ domain }}/.htsecure) { rewrite ^(.*)$ https://$host$1 permanent; }
+    if ($remote_addr !~ (127.0.0.1) and -f {{ document_root }}/.htsecure) { rewrite ^(.*)$ https://$host$1 permanent; }
 
-    # BXTEMP - personal settings
-    include conf.d/bx_temp.conf;
+    # custom options for sites; doesn't changes on update
+    include bx/site_settings/{{ domain }}/*.conf;
 
     # Include parameters common to all websites
-    include conf.d/bitrix.conf;
+    include bx/conf/bitrix.conf;
 }
 
 
@@ -48,6 +54,7 @@ server {
     ### START PLEASE DONT DELETE OR EDIT THIS COMMENT MANAGED SSL CERTS. YOU CAN MAKE EDITS BETWEEN THESE COMMENTS ###
 
     # HERE YOU CAN CONNECT YOUR CONFIG WITH AN SSL CERTIFICATE
+    include bx/conf/ssl.conf;
     include ssl_conf/ssl_{{ domain }}.conf;
 
     # DONT DELETE THIS PARAMETERS - MANAGED SSL CERTS FROM Lets Encrypt
@@ -65,6 +72,8 @@ server {
     proxy_set_header    X-Forwarded-Proto   https;
     set                 $is_global_cache    1;
 
+    set $proxyserver	"http://127.0.0.1:8090";
+
     proxy_redirect ~^(http://[^:]+):\d+(/.+)$ $1$2;
     proxy_redirect ~^(https://[^:]+):\d+(/.+)$ $1$2;
 
@@ -73,9 +82,9 @@ server {
     index index.php;
     root "{{ path_sites }}/{{ domain }}";
 
-    # BXTEMP - personal settings
-    include conf.d/bx_temp.conf;
+    # custom options for sites; doesn't changes on update
+    include bx/site_settings/{{ domain }}/*.conf;
 
     # Include parameters common to all websites
-    include conf.d/bitrix.conf;
+    include bx/conf/bitrix.conf;
 }

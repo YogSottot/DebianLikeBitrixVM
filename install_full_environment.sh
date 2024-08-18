@@ -41,9 +41,27 @@ DEST_DIR_MENU="/root"
 
 FULL_PATH_MENU_FILE="$DEST_DIR_MENU/$DIR_NAME_MENU/menu.sh"
 
+# Function to compare versions
+version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
+
+# Get OS and version information
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+elif [ -f /etc/lsb-release ]; then
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+    VER=$DISTRIB_RELEASE
+fi
+
+# Check if it's Ubuntu 22.04 or less
+if [[ "$OS" == "Ubuntu" && $(echo -e "$VER\n22.04" | sort -V | head -n1) == "$VER" ]]; then
+    add-apt-repository ppa:ondrej/nginx
+fi
 apt update -y
 apt upgrade -y
-apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static
+apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter
 
 # Set locales
 locale-gen en_US.UTF-8
@@ -109,15 +127,15 @@ cd $DEST_DIR_MENU
 chmod -R +x $DEST_DIR_MENU/$DIR_NAME_MENU
 
 # Check script in .profile and add to .profile if not exist
-if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
-  cat << INSTALL_MENU >> /root/.profile
+#if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
+#  cat << INSTALL_MENU >> /root/.profile
 
-if [ -n "\$SSH_CONNECTION" ]; then
-  $FULL_PATH_MENU_FILE
-fi
+#if [ -n "\$SSH_CONNECTION" ]; then
+#  $FULL_PATH_MENU_FILE
+#fi
 
-INSTALL_MENU
-fi
+#INSTALL_MENU
+#fi
 
 # Configure apache2 modules
 a2enmod remoteip
