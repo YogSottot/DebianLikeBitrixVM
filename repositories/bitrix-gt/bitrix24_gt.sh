@@ -705,7 +705,7 @@ then
 
 	#echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf}
 	#sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf
-	sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf
+	#sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf
 	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
 
 	#sed -i 's|user apache|user www-data|' /etc/nginx/nginx.conf
