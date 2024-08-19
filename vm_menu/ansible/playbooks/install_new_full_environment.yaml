@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local
   become: true
-  gather_facts: false
+  gather_facts: true
   vars:
     bx_temporary_files_directory: "{{ path_sites }}/.bx_temp/{{ db_name }}/"
   tasks:
