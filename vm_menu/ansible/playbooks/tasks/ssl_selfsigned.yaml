@@ -19,8 +19,8 @@
   community.crypto.openssl_csr:
     path: "/etc/{{ service_nginx_name }}/ssl/ansible.com.csr"
     privatekey_path: "/etc/{{ service_nginx_name }}/ssl/cert.key"
-    common_name: Bitrix
-    organization_name: Bitrix, Inc.
+    common_name: "Bitrix"
+    organization_name: "Bitrix, Inc."
     force: false
 
 - name: Generate self-signed SSL certificates

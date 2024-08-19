@@ -105,7 +105,7 @@
         mode: "{{ permissions_sites_files }}"
 
     ############## NGINX ##############
-    - name: Generate ssl-cert adn dhparam
+    - name: Generate ssl-cert and dhparam
       ansible.builtin.include_tasks: "tasks/ssl_selfsigned.yaml"
 
     - name: Get Nginx version
