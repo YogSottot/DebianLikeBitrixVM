@@ -99,21 +99,21 @@ set +x
 set -euo pipefail
 
 # set mysql root password
-root_pass=$(generate_password 24)
+#root_pass=$(generate_password 24)
 site_user_password=$(generate_password 24)
 
-mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${root_pass}');FLUSH PRIVILEGES;"
+#mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${root_pass}');FLUSH PRIVILEGES;"
 
-cat > /root/.my.cnf <<CONFIG_MYSQL_ROOT_MY_CNF
-[client]
-user=root
-password="${root_pass}"
+#cat > /root/.my.cnf <<CONFIG_MYSQL_ROOT_MY_CNF
+#[client]
+#user=root
+#password="${root_pass}"
 # socket=/var/lib/mysqld/mysqld.sock
 
-CONFIG_MYSQL_ROOT_MY_CNF
+#CONFIG_MYSQL_ROOT_MY_CNF
 
 # Clone directory vm_menu with repositories
-git clone --depth 1 --filter=blob:none --sparse $REPO_URL "$DEST_DIR_MENU/DebianLikeBitrixVM"
+git clone -b $BRANCH --depth 1 --filter=blob:none --sparse $REPO_URL "$DEST_DIR_MENU/DebianLikeBitrixVM"
 cd "$DEST_DIR_MENU/DebianLikeBitrixVM"
 git sparse-checkout set $DIR_NAME_MENU
 
