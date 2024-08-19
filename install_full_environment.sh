@@ -261,7 +261,6 @@ echo -e "\n";
 echo "Password for the user ${BS_USER_SERVER_SITES}:";
 echo "${site_user_password}";
 echo -e "\n";
-/etc/apache2/mods-enabled/remoteip.conf
 END
 
 bash /root/temp_install_full_environment.sh
