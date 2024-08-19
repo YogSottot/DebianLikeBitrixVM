@@ -656,7 +656,7 @@ then
 		nodejs npm redis sysfsutils firewalld
 		#nftables
 	echo 'kernel/mm/transparent_hugepage/enabled = madvise' >> /etc/sysfs.conf
-	systemctl restart sysfsconf
+	systemctl restart sysfsutils
 	#sed -i "s/dc_eximconfig_configtype='local'/dc_eximconfig_configtype='internet'/" /etc/exim4/update-exim4.conf.conf && dpkg-reconfigure --frontend noninteractive exim4-config
 	#ip=$(wget -qO- "https://ipinfo.io/ip")
 	mariadb -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${DBPASS}')"
