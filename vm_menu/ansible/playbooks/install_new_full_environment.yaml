@@ -5,15 +5,16 @@
   become: true
   gather_facts: false
   vars:
-    - bx_temporary_files_directory: "{{ path_sites }}/.bx_temp/{{ domain }}/"
+    bx_temporary_files_directory: "{{ path_sites }}/.bx_temp/{{ domain }}/"
   tasks:
-    - ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
+    - name: Add cron agents
+      ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
       vars:
-        - path_file_run_cron: "{{ document_root }}{{ bx_cron_agents_path_file_after_document_root }}"
-        - user_site: "{{ user_server_sites }}"
-        - group_user_site: "{{ group_user_server_sites }}"
-        - logs_path_dir: "{{ bx_cron_logs_path_dir }}"
-        - logs_path_file: "{{ bx_cron_logs_path_file }}"
+        path_file_run_cron: "{{ document_root }}{{ bx_cron_agents_path_file_after_document_root }}"
+        user_site: "{{ user_server_sites }}"
+        group_user_site: "{{ group_user_server_sites }}"
+        logs_path_dir: "{{ bx_cron_logs_path_dir }}"
+        logs_path_file: "{{ bx_cron_logs_path_file }}"
 
     - name: Creating directory from bitrix temporary files
       ansible.builtin.file:
@@ -53,7 +54,7 @@
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
         timeout: "{{ timeout_download_bitrix_install_files_new_site }}"
-      ignore_errors: yes
+      ignore_errors: true
       with_items: "{{ urls }}"
 
     - name: Creating of downloaded file names array
@@ -145,7 +146,7 @@
         src: "{{ path_nginx_sites_conf }}/default.conf"
         dest: "{{ path_nginx_sites_enabled }}/default.conf"
         state: link
-        
+
     - name: Creating symbol link for Nginx rtc configuration file
       ansible.builtin.file:
         src: "{{ path_nginx_sites_conf }}/rtc.conf"
@@ -179,6 +180,9 @@
       ansible.builtin.template:
         dest: "{{ path_apache_sites_conf }}/default.conf"
         src: "roles/create_site/templates/apache_conf/default.j2"
+        owner: root
+        group: root
+        mode: '644'
 
     - name: Creating symbol link (site_enable) for Apache configuration file
       ansible.builtin.file:
@@ -194,14 +198,13 @@
     ############## PHP-FPM ##############
     - name: Setup PHP settings
       ansible.builtin.include_role:
-        - geerlingguy.php
-        
+        name: geerlingguy.php
+
     ############## MySQL ##############
     - name: Setup MySQL settings
       ansible.builtin.include_role:
-        - geerlingguy.mysql
-        
-        
+        name: geerlingguy.mysql
+
 # Change site user for connection SSH
     - name: Installing of python3-passlib
       ansible.builtin.apt:

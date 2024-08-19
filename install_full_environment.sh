@@ -93,11 +93,7 @@ export LC_ALL="en_US.UTF-8"
 
 bash -c "$(curl -sL $SETUP_BITRIX_DEBIAN_URL)"
 
-printf "Step 1 end\n"
-
-#source /root/run.sh
-
-printf "Step 2 start\n"
+source /root/run.sh
 
 set +x
 set -euo pipefail

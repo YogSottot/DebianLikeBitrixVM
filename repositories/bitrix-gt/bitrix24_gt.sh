@@ -47,8 +47,9 @@ then
 fi
 
 mypwd=$(echo $RANDOM|md5sum|head -c 15)
-mypwddb=$(echo $RANDOM|md5sum|head -c 15)
+DBPASS=$(echo $RANDOM|md5sum|head -c 15)
 cryptokey=$(echo $RANDOM|md5sum|cut -d' ' -f1)
+PUSH_KEY=$(echo $RANDOM|md5sum|cut -d' ' -f1)
 
 dbconn() {
 	cat <<-EOF
@@ -57,7 +58,7 @@ dbconn() {
 		\$DBType = "mysql";
 		\$DBHost = "localhost";
 		\$DBLogin = 'bitrix';
-		\$DBPassword = '${mypwddb}';
+		\$DBPassword = '${DBPASS}';
 		\$DBName = "bitrix";
 		\$DBDebug = false;
 		\$DBDebugToFile = false;
@@ -188,7 +189,7 @@ settings() {
 			'host' => 'localhost',
 			'database' => 'bitrix',
 			'login'    => 'bitrix',
-			'password' => '${mypwddb}',
+			'password' => '${DBPASS}',
 			'options' => 2,
 		      ),
 		    ),
@@ -212,7 +213,7 @@ settings() {
 			'nginx_headers' => 'N',
 			'push' => 'Y',
 			'websocket' => 'Y',
-			'signature_key' => '${cryptokey}',
+			'signature_key' => '${PUSH_KEY}',
 			'signature_algo' => 'sha1',
 			'guest' => 'N',
 		    ),
@@ -443,7 +444,7 @@ dplPush(){
 
 	cat <<EOF >> /etc/default/push-server-multi
 GROUP=www-data
-SECURITY_KEY="${cryptokey}"
+SECURITY_KEY="${PUSH_KEY}"
 RUN_DIR=/tmp/push-server
 REDIS_SOCK=/var/run/redis/redis.sock
 WS_HOST=127.0.0.1
@@ -614,7 +615,7 @@ then
 
 	systemctl enable redis php-fpm nginx httpd push-server mariadb
 	systemctl restart redis crond httpd nginx php-fpm mysql push-server
-	mysql -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${mypwddb}')"
+	mysql -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${DBPASS}')"
 fi
 
 
@@ -659,7 +660,7 @@ then
 	systemctl restart sysfsconf
 	#sed -i "s/dc_eximconfig_configtype='local'/dc_eximconfig_configtype='internet'/" /etc/exim4/update-exim4.conf.conf && dpkg-reconfigure --frontend noninteractive exim4-config
 	#ip=$(wget -qO- "https://ipinfo.io/ip")
-	mariadb -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${mypwddb}')"
+	mariadb -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${DBPASS}')"
 	#nfTabl
 	firewalld
 	dplRedis
@@ -719,5 +720,3 @@ then
 fi
 
 END
-
-bash /root/run.sh
