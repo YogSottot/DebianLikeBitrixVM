@@ -690,14 +690,14 @@ then
 	mv -f ./nginx/* /etc/nginx/
 	rm -rf ./{httpd,nginx}
 
-	phpsetup >> ${phpini}
-	phpsetup >> ${phpini2}
-	fpmsetup 'www-data' > ${phpfpmcnf}
-	cronagent 'www-data' > ${croncnf}
-	mysqlcnf > ${mycnf}
+	#phpsetup >> ${phpini}
+	#phpsetup >> ${phpini2}
+	#fpmsetup 'www-data' > ${phpfpmcnf}
+	#cronagent 'www-data' > ${croncnf}
+	#mysqlcnf > ${mycnf}
 	chown -R www-data:www-data /var/www/html
 	ln -s /var/lib/php/sessions /var/lib/php/session
-	ln -s /etc/nginx/bx/site_avaliable/rtc.conf /etc/nginx/bx/site_enabled/
+	#ln -s /etc/nginx/bx/site_avaliable/rtc.conf /etc/nginx/bx/site_enabled/
 
 	envver=9999.9.9
 	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')

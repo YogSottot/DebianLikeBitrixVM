@@ -1,0 +1,40 @@
+---
+- name: Ensure configuration directories exist.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    follow: true
+    mode: "0755"
+  with_items:
+    - "{{ php_conf_paths | flatten }}"
+    - "{{ php_extension_conf_paths | flatten }}"
+
+- name: Place PHP configuration file in place. # noqa name[casing]
+  ansible.builtin.template:
+    src: php.ini.j2
+    dest: "{{ item }}/php.ini"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ php_conf_paths }}"
+  notify: restart webserver
+  when: php_use_managed_ini
+
+- name: Place PHP configuration file in place. # noqa name[casing]
+  ansible.builtin.template:
+    src: bitrixenv.ini.j2
+    dest: "{{ item }}/bitrixenv.ini"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ php_extension_conf_paths }}"
+  notify: restart webserver
+  when: php_use_managed_bitrixenv_ini
+
+- name: Make directory for logs
+  ansible.builtin.file:
+    path: /var/log/php-fpm/
+    state: directory
+    recurse: true
+    owner: "{{ php_fpm_pool_user }}"
+    group: "{{ php_fpm_pool_group }}"

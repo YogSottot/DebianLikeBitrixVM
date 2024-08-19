@@ -1,0 +1,10 @@
+---
+- name: Set php-fpm manual as alternatives
+  community.general.alternatives:
+    name: php-fpm.sock
+    path: "/run/php/php{{ php_version }}-fpm.sock"
+
+- name: Set php manual as alternatives
+  community.general.alternatives:
+    name: php
+    path: "/usr/bin/php{{ php_version }}"

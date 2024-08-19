@@ -145,6 +145,12 @@
         src: "{{ path_nginx_sites_conf }}/default.conf"
         dest: "{{ path_nginx_sites_enabled }}/default.conf"
         state: link
+        
+    - name: Creating symbol link for Nginx rtc configuration file
+      ansible.builtin.file:
+        src: "{{ path_nginx_sites_conf }}/rtc.conf"
+        dest: "{{ path_nginx_sites_enabled }}/rtc.conf"
+        state: link
 
     - name: Adding Nginx site_settings directory
       ansible.builtin.file:
@@ -185,6 +191,17 @@
         name: "{{ service_apache_name }}"
         state: restarted
 
+    ############## PHP-FPM ##############
+    - name: Setup PHP settings
+      ansible.builtin.include_role:
+        - geerlingguy.php
+        
+    ############## MySQL ##############
+    - name: Setup MySQL settings
+      ansible.builtin.include_role:
+        - geerlingguy.mysql
+        
+        
 # Change site user for connection SSH
     - name: Installing of python3-passlib
       ansible.builtin.apt:
