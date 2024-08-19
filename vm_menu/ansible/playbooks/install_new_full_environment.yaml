@@ -64,7 +64,7 @@
 
     - name: Generating index.html using links of downloaded files
       ansible.builtin.template:
-        dest: "{{ document_root }}/index.html"
+        dest: "{{ document_root }}/index.php"
         src: "roles/create_site/templates/site_full_tpl/index.j2"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
