@@ -95,6 +95,14 @@
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
 
+    - name: Generating after_connect_d7.php file
+      ansible.builtin.template:
+        dest: "{{ document_root }}/bitrix/php_interface/after_connect_d7.php"
+        src: "roles/create_site/templates/site_full_tpl/after_connect_d7.php.j2"
+        owner: "{{ user_server_sites }}"
+        group: "{{ group_user_server_sites }}"
+        mode: "{{ permissions_sites_files }}"
+
     ############## SITE FILES ##############
     - name: Adding .htaccess file
       ansible.builtin.copy:

@@ -15,6 +15,9 @@ action_create_site(){
   db_name=${db_name} \
   db_user=${db_user} \
   db_password=${db_password} \
+  mysql_character_set_server=${BS_DB_CHARACTER_SET_SERVER} \
+  mysql_collation_server=${BS_DB_COLLATION} \
+  mysql_init_connect=${BS_DB_MYSQL_INIT_CONNECT} \
 
   path_site_from_links=${path_site_from_links} \
   ssl_lets_encrypt=${ssl_lets_encrypt} \
