@@ -96,9 +96,8 @@ dplRedis(){
     [[ ! -d /etc/systemd/system/redis.service.d ]] && mkdir /etc/systemd/system/redis.service.d
     echo -e '[Service]\nGroup=www-data\nPIDFile=/run/redis/redis-server.pid' > /etc/systemd/system/redis.service.d/custom.conf
     systemctl daemon-reload
-    systemctl stop redis
-    systemctl enable --now redis || systemctl enable --now redis-server
-    #systemctl start redis
+    systemctl stop redis redis-server
+    systemctl enable --now redis-server
 }
 
 fastDownload() {
@@ -687,7 +686,7 @@ then
 	ln -s /var/log/apache2 /etc/apache2/logs
 	echo 'Listen 127.0.0.1:8090' > /etc/apache2/ports.conf
 	#apacheCnf >> /etc/apache2/apache2.conf
-	rm /etc/apache2/bx/conf/bx_apache_site_name_port.conf
+	#rm /etc/apache2/bx/conf/bx_apache_site_name_port.conf
 
 	mv -f ./nginx/* /etc/nginx/
 	rm -rf ./{httpd,nginx}
