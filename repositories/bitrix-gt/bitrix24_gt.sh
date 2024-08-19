@@ -703,19 +703,19 @@ then
 	envver=9999.9.9
 	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
 
-	#echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf}
-	#sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf
-	#sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf
-	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
+	echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf} || true
+	sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf || true
+	sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf || true
+	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2} || true
 
 	#sed -i 's|user apache|user www-data|' /etc/nginx/nginx.conf
 	rm /etc/apache2/sites-enabled/000-default.conf
 
 
-	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}
+	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2} || true
 
 	systemctl restart cron mysql php8.2-fpm apache2 nginx php8.2-fpm redis-server push-server
-	systemctl enable cron mysql php8.2-fpm apache2 nginx php8.2-fpm push-server
+	systemctl enable cron mysql php8.2-fpm apache2 nginx php8.2-fpm redis-server push-server
 fi
 
 END
