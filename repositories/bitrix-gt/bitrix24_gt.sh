@@ -97,7 +97,7 @@ dplRedis(){
     systemctl daemon-reload
     systemctl stop redis
     systemctl enable --now redis || systemctl enable --now redis-server
-    systemctl start redis
+    #systemctl start redis
 }
 
 fastDownload() {
@@ -433,7 +433,7 @@ dplPush(){
 	ln -sf /opt/node_modules/push-server/etc/push-server /etc/push-server
 
 	cd /opt/node_modules/push-server
-	sed -i 's/sysconfig/default/g' ./push-server/etc/init.d/push-server-multi
+	sed -i 's/sysconfig/default/g' ./etc/init.d/push-server-multi
 	cp etc/init.d/push-server-multi /usr/local/bin/push-server-multi
 	sed -i 's/USER\=bitrix/USER\=www-data/g' etc/sysconfig/push-server-multi
 	cp etc/sysconfig/push-server-multi  /etc/default/push-server-multi
@@ -658,7 +658,7 @@ then
 	echo 'kernel/mm/transparent_hugepage/enabled = madvise' >> /etc/sysfs.conf
 	systemctl restart sysfsconf
 	#sed -i "s/dc_eximconfig_configtype='local'/dc_eximconfig_configtype='internet'/" /etc/exim4/update-exim4.conf.conf && dpkg-reconfigure --frontend noninteractive exim4-config
-	ip=$(wget -qO- "https://ipinfo.io/ip")
+	#ip=$(wget -qO- "https://ipinfo.io/ip")
 	mariadb -e "create database bitrix;create user bitrix@localhost;grant all on bitrix.* to bitrix@localhost;set password for bitrix@localhost = PASSWORD('${mypwddb}')"
 	#nfTabl
 	firewalld
@@ -682,8 +682,9 @@ then
 	a2enmod rewrite
 	a2enmod proxy
 	a2enmod proxy_fcgi
+	a2enmod setenvif
 	ln -s /var/log/apache2 /etc/apache2/logs
-	echo 'Listen 127.0.0.1:8888' > /etc/apache2/ports.conf
+	echo 'Listen 127.0.0.1:8090' > /etc/apache2/ports.conf
 	#apacheCnf >> /etc/apache2/apache2.conf
 	rm /etc/apache2/bx/conf/bx_apache_site_name_port.conf
 
@@ -702,7 +703,7 @@ then
 	envver=9999.9.9
 	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
 
-	echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf}
+	#echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf}
 	#sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf
 	sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf
 	chmod 644 ${mycnf} ${phpini} ${phpfpmcnf} ${croncnf} ${phpini2}

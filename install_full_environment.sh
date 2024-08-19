@@ -93,7 +93,11 @@ export LC_ALL="en_US.UTF-8"
 
 bash -c "$(curl -sL $SETUP_BITRIX_DEBIAN_URL)"
 
+printf "Step 1 end\n"
+
 source /root/run.sh
+
+printf "Step 2 start\n"
 
 set +x
 set -euo pipefail
@@ -261,7 +265,7 @@ echo -e "\n";
 echo "Password for the user ${BS_USER_SERVER_SITES}:";
 echo "${site_user_password}";
 echo -e "\n";
-
+/etc/apache2/mods-enabled/remoteip.conf
 END
 
 bash /root/temp_install_full_environment.sh
