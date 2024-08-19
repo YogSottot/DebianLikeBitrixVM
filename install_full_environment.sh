@@ -57,11 +57,13 @@ fi
 
 # Check if it's Ubuntu 22.04 or less
 if [[ "$OS" == "Ubuntu" && $(echo -e "$VER\n22.04" | sort -V | head -n1) == "$VER" ]]; then
-    add-apt-repository ppa:ondrej/nginx
+    apt update -y
+    apt install -y software-properties-common
+    add-apt-repository -y ppa:ondrej/nginx
 fi
 apt update -y
 apt upgrade -y
-apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter unattended-upgrades
+apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc nginx-light libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter unattended-upgrades software-properties-common
 
 # Set locales
 locale-gen en_US.UTF-8

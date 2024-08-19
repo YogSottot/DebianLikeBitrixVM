@@ -2,7 +2,7 @@
 #
 # metadata_begin
 # recipe: Bitrix24 GT
-# tags: centos7,debian11,debian12
+# tags: centos7,debian11,debian12,ubuntu20.04,ubuntu22.04,ubuntu24.04
 # revision: 6
 # description_ru: Рецепт установки Bitrix24
 # description_en: Bitrix CMS installing recipe
@@ -36,7 +36,7 @@ then
 	rediscnf='/etc/redis.conf'
 fi
 
-if echo $os|grep -E '^Debian' >/dev/null
+if echo $os|grep -E '^(Debian|Ubuntu)' >/dev/null
 then
 	mycnf='/etc/mysql/conf.d/z9_bitrix.cnf'
 	phpini='/etc/php/8.2/fpm/conf.d/z9_bitrix.ini'
@@ -618,7 +618,7 @@ then
 fi
 
 
-if echo $os|grep -Eo 'Debian' >/dev/null
+if echo $os|grep -Eo '^(Debian|Ubuntu)' >/dev/null
 then
 	apt update
 	apt install -y software-properties-common apt-transport-https debconf-utils lsb-release gnupg gnupg2 debian-archive-keyring pwgen wget curl
@@ -642,7 +642,7 @@ then
 
 	if [ -f /etc/lsb-release ] && grep -q "Ubuntu" /etc/lsb-release; then
     # Ubuntu-specific command
-    add-apt-repository ppa:ondrej/php
+    add-apt-repository -y ppa:ondrej/php
 	elif [ -f /etc/debian_version ]; then
     # Debian-specific commands
     wget -qO /etc/apt/trusted.gpg.d/php.gpg https://mirror.yandex.ru/mirrors/packages.sury.org/php/apt.gpg
