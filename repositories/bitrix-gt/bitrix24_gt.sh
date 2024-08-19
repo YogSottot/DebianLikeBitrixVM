@@ -15,14 +15,14 @@
 cat > /root/run.sh <<\END
 
 set -x
-LOG_PIPE=/tmp/log.pipe
-mkfifo ${LOG_PIPE}
-LOG_FILE=/root/recipe.log
-touch ${LOG_FILE}
-chmod 600 ${LOG_FILE}
-tee < ${LOG_PIPE} ${LOG_FILE} &
-exec > ${LOG_PIPE}
-exec 2> ${LOG_PIPE}
+#LOG_PIPE=/tmp/log.pipe
+#mkfifo ${LOG_PIPE}
+#LOG_FILE=/root/recipe.log
+#touch ${LOG_FILE}
+#chmod 600 ${LOG_FILE}
+#tee < ${LOG_PIPE} ${LOG_FILE} &
+#exec > ${LOG_PIPE}
+#exec 2> ${LOG_PIPE}
 
 os=`set -o pipefail && { cat /etc/centos-release || { source /etc/os-release && echo $PRETTY_NAME; } ;}`
 
