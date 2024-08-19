@@ -115,7 +115,7 @@ php_post_max_size: "1024M"
 php_date_timezone: "{{ timesync_timezone }}"
 php_allow_url_fopen: "On"
 
-php_sendmail_path: "msmtp -t -i"
+php_sendmail_path: "sendmail -t -i"
 php_output_buffering: "4096"
 php_short_open_tag: "On"
 php_disable_functions: []
@@ -125,14 +125,14 @@ php_session_gc_probability: 1
 php_session_gc_divisor: 1000
 php_session_gc_maxlifetime: 604800
 php_session_save_handler: files
-php_session_save_path: "/tmp/php_sessions/www"
+php_session_save_path: "/var/lib/php/sessions/"
 php_session_name: "PHPSESSID"
 
 php_error_reporting: "E_ALL & ~E_NOTICE & ~E_DEPRECATED"
 php_display_errors: "Off"
 php_display_startup_errors: "Off"
 
-php_upload_tmp_dir: "/tmp/php_upload/www"
+php_upload_tmp_dir: "/tmp/"
 
 # Install PHP from source (instead of using a package manager) with these vars.
 php_install_from_source: false
