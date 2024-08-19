@@ -30,7 +30,7 @@ server {
     root "{{ path_sites }}/{{ domain }}";
 
     # Redirect to ssl if need
-    if ($remote_addr !~ (127.0.0.1) and -f {{ document_root }}/.htsecure) { rewrite ^(.*)$ https://$host$1 permanent; }
+    if ($redirect_https) { return 301 https://$host$request_uri; }
 
     # custom options for sites; doesn't changes on update
     include bx/site_settings/{{ domain }}/*.conf;
