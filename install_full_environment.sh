@@ -95,7 +95,7 @@ bash -c "$(curl -sL $SETUP_BITRIX_DEBIAN_URL)"
 
 printf "Step 1 end\n"
 
-source /root/run.sh
+#source /root/run.sh
 
 printf "Step 2 start\n"
 

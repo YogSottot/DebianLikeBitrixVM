@@ -720,4 +720,4 @@ fi
 
 END
 
-#bash /root/run.sh
+bash /root/run.sh
