@@ -702,7 +702,6 @@ then
 
 	envver=9999.9.9
 	#envver=$(wget -qO- 'https://repos.1c-bitrix.ru/yum/SRPMS/' | grep -Eo 'bitrix-env-[0-9]\.[^src\.rpm]*'|sort -n|tail -n 1 | sed 's/bitrix-env-//;s/-/./')
-
 	echo "env[BITRIX_VA_VER]=${envver}" >> ${phpfpmcnf} || true
 	sed -i 's/general/crm/' /etc/apache2/bx/conf/00-environment.conf || true
 	sed -i "/BITRIX_VA_VER/d;\$a SetEnv BITRIX_VA_VER ${envver}" /etc/apache2/bx/conf/00-environment.conf || true

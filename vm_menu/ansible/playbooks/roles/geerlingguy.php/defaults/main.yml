@@ -10,6 +10,7 @@ php_packages_extra: []
 php_default_version_debian: "{{ php_version }}"
 php_version: "8.2"
 php_set_manual: true
+php_bitrix_env_emulate: true
 
 # PHP package state; use 'present' to make sure it's installed, or 'latest' if
 # you want to upgrade or switch versions using a new repo.

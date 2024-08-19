@@ -21,3 +21,6 @@ pm.status_path = {{ item.pool_pm_status_path }}
 php_flag[display_errors] = {{ item.pool_php_flag_display_errors }}
 php_admin_value[error_log] = {{ item.pool_php_admin_value_error_log }}
 php_admin_flag[log_errors] = {{ item.pool_php_admin_flag_log_errors }}
+{% if php_bitrix_env_emulate %} 
+env[BITRIX_VA_VER]=9999.9.9
+{% end %}
