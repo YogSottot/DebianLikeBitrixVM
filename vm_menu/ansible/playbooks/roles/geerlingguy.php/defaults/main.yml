@@ -133,3 +133,6 @@ php_display_errors: "Off"
 php_display_startup_errors: "Off"
 
 php_upload_tmp_dir: "/tmp/php_upload/www"
+
+# Install PHP from source (instead of using a package manager) with these vars.
+php_install_from_source: false
