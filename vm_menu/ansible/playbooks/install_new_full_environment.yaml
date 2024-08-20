@@ -112,6 +112,11 @@
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
 
+    ############## Systemd ##############
+    - name: Setup PHP settings
+      ansible.builtin.include_role:
+        name: systemd-overrides
+
     ############## NGINX ##############
     - name: Generate ssl-cert and dhparam
       ansible.builtin.include_tasks: "tasks/ssl_selfsigned.yaml"
