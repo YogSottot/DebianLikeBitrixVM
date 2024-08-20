@@ -114,7 +114,6 @@ mysql_log_timestamps: SYSTEM
 # collations
 mysql_character_set_server: "utf8mb4"
 mysql_collation_server: "utf8mb4_unicode_ci"
-mysql_init_connect: "'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'"
 
 # InnoDB settings.
 mysql_innodb_file_per_table: "1"
