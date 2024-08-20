@@ -5,5 +5,5 @@ location ~* ^/bx_tmp_download/ {
 
 location ~* ^/\.bx_temp/{{ db_name }}/ {
     internal;
-    root /var/www/html/;
+    root {{ path_sites }};
 }
