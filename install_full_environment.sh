@@ -224,7 +224,6 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   db_password=${DBPASS} \
   mysql_character_set_server=${BS_DB_CHARACTER_SET_SERVER} \
   mysql_collation_server=${BS_DB_COLLATION} \
-  mysql_init_connect=${BS_DB_MYSQL_INIT_CONNECT} \
 
   site_user_password=${site_user_password} \
 
