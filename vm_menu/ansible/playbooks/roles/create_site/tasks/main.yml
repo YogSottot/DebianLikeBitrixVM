@@ -84,7 +84,6 @@
       community.mysql.mysql_db:
         name: "{{ db_name }}"
         state: present
-      # ignore_errors: yes
 
     - name: Creating database user
       community.mysql.mysql_user:
@@ -92,7 +91,6 @@
         password: "{{ db_password }}"
         priv: "{{ db_name }}.*:ALL"
         state: present
-      # ignore_errors: yes
 
     - name: Creating directory bitrix/php_interface
       ansible.builtin.file:
@@ -157,10 +155,27 @@
     mode: "{{ permissions_sites_files }}"
 
 ############## NGINX ##############
+- name: Creating directory from bitrix site settings
+  ansible.builtin.file:
+    state: directory
+    path: "/etc/{{ service_nginx_name }}/custom_conf.d/site_settings/{{ domain }}"
+    recurse: true
+
+- name: Adding Nginx configuration file site
+  ansible.builtin.template:
+    dest: "/etc/{{ service_nginx_name }}/custom_conf.d/site_settings/{{ domain }}/bx_temp.conf"
+    src: "nginx_conf/bx_temp.j2"
+    owner: root
+    group: root
+    mode: '644'
+
 - name: Copying ssl_default.conf to ssl_{{ domain }}.conf
   ansible.builtin.copy:
     src: "nginx_files/ssl_conf/ssl_default.conf"
     dest: "/etc/{{ service_nginx_name }}/ssl_conf/ssl_{{ domain }}.conf"
+    owner: root
+    group: root
+    mode: '644'
 
 - name: Adding Nginx configuration file
   ansible.builtin.template:

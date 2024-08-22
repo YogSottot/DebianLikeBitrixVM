@@ -6,6 +6,7 @@
   gather_facts: true
   vars:
     bx_temporary_files_directory: "{{ path_sites }}/.bx_temp/{{ db_name }}/"
+
   tasks:
     - name: Add cron agents
       ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
