@@ -194,4 +194,3 @@
   systemd:
     name: "{{ service_apache_name }}"
     state: restarted
-
