@@ -55,3 +55,10 @@ date.timezone = {{ php_date_timezone }}
 memory_limit = {{ php_memory_limit }}
 
 disable_functions = {{ php_disable_functions|join(",") }}
+
+; Xdebug
+xdebug.client_host = localhost
+xdebug.trigger_value = PHPSTORM
+xdebug.start_with_request = trigger
+xdebug.mode = debug
+

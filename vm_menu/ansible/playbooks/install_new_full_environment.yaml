@@ -255,13 +255,13 @@
         mode: '0700'
 
     - name: Generating SSH key
-      ansible.builtin.command: ssh-keygen -t ed25519 -b 2048 -f "/home/{{ user_server_sites }}/.ssh/ed25519" -N ''
+      ansible.builtin.command: ssh-keygen -t ed25519 -b 2048 -f "/home/{{ user_server_sites }}/.ssh/id_ed25519" -N ''
       args:
-        creates: "/home/{{ user_server_sites }}/.ssh/ed25519"
+        creates: "/home/{{ user_server_sites }}/.ssh/id_ed25519"
 
     - name: Copying public key in authorized_keys
       ansible.builtin.copy:
-        src: "/home/{{ user_server_sites }}/.ssh/ed25519.pub"
+        src: "/home/{{ user_server_sites }}/.ssh/id_ed25519.pub"
         dest: "/home/{{ user_server_sites }}/.ssh/authorized_keys"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
