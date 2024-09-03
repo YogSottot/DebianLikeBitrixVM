@@ -65,6 +65,9 @@ apt update -y
 apt upgrade -y
 apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc nginx-light libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter unattended-upgrades software-properties-common
 
+# set timezone
+timedatectl set-timezone Europe/Moscow
+
 # Set locales
 locale-gen en_US.UTF-8
 locale-gen en_GB.UTF-8
