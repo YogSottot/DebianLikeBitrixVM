@@ -63,7 +63,7 @@ if [[ "$OS" == "Ubuntu" && $(echo -e "$VER\n22.04" | sort -V | head -n1) == "$VE
 fi
 apt update -y
 apt upgrade -y
-apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc nginx-light libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter unattended-upgrades software-properties-common
+apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc nginx-light libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter unattended-upgrades software-properties-common webp optipng jpegoptim ghostscript gifsicle
 
 # set timezone
 timedatectl set-timezone Europe/Moscow
