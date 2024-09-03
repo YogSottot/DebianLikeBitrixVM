@@ -115,4 +115,4 @@ BS_CHECK_UPDATE_MENU_MINUTES=10
 BS_MYSQL_CMD="mysql"
 
 # Push-server configs
-BS_PUSH_SERVER_CONFIG=/etc/sysconfig/push-server-multi
+BS_PUSH_SERVER_CONFIG=/etc/default/push-server-multi
