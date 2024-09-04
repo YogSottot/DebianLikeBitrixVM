@@ -5,10 +5,10 @@ set -euo pipefail
 # MASTER branch
 
 # use curl
-# bash <(curl -sL https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/install_full_environment_fpm.sh)
+# bash <(curl -sL https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/feature/php-fpm/install_full_environment_fpm.sh)
 
 # use wget
-# bash <(wget -qO- https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/install_full_environment_fpm.sh)
+# bash <(wget -qO- https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/feature/php-fpm/install_full_environment_fpm.sh)
 
 cat > /root/temp_install_full_environment.sh <<\END
 #!/usr/bin/env bash
