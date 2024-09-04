@@ -60,7 +60,8 @@ server {
     ### START PLEASE DONT DELETE OR EDIT THIS COMMENT MANAGED SSL CERTS. YOU CAN MAKE EDITS BETWEEN THESE COMMENTS ###
 
     # HERE YOU CAN CONNECT YOUR CONFIG WITH AN SSL CERTIFICATE
-    include ssl_conf/ssl_{{ domain }}.conf;
+    ## include ssl_conf/ssl_{{ domain }}.conf;
+    include bx/conf/ssl.conf;
 
     # DONT DELETE THIS PARAMETERS - MANAGED SSL CERTS FROM Lets Encrypt
     # ssl_certificate /path/lets_encrypt/cert/fullchain.pem;

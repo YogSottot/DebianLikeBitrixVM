@@ -92,7 +92,8 @@ menu_install_extensions(){
 
     echo -e "\n          Menu -> Installing Extensions:\n";
     echo "          1) Install/Delete Sphinx";
-    echo "          2) Install/Delete Netdata";
+    echo "          2) Install/Delete File Conversion Server (transformer)";
+    echo "          3) Install/Delete Netdata";
     echo "          0) Return to main menu";
     echo -e "\n\n";
     echo -n "Enter command: "
@@ -100,8 +101,9 @@ menu_install_extensions(){
 
     case $comand in
 
-      "1") install_sphinx ;;
-      "2") install_netdata ;;
+     "1") install_sphinx ;;
+     "2") install_file_conversion_server ;;
+     "3") install_netdata ;;
 
     0|z)  main_menu
     ;;
@@ -570,6 +572,7 @@ function reboot_server() {
     esac
   done
 }
+
 function power_off_server() {
   clear
   while true; do
@@ -617,6 +620,46 @@ function install_sphinx() {
     read -r -p "   Do you really want to$(echo -e "${action_color}")Sphinx? (Y/N): " answer
     case $answer in
       [Yy]* ) action_install_or_delete_sphinx; break;;
+      [Nn]* ) break;;
+      * ) echo "   Please enter Y or N.";;
+    esac
+  done
+}
+
+function install_file_conversion_server() {
+  clear
+  domain='';
+  full_path_site="${BS_PATH_SITES}/${BS_DEFAULT_SITE_NAME}";
+  action="INSTALL";
+  if dpkg -l | grep -q rabbitmq-server; then
+      action="DELETE"
+  fi
+
+  if [ $action == "INSTALL" ]; then
+    list_sites;
+    echo -e "\n";
+
+    while [[ -z "$domain" ]]; do
+       read_by_def "   Enter site domain (example: example.com): " domain $domain;
+       if [ -z "$domain" ]; then
+        echo "   Incorrect site domain! Please enter another site domain";
+       fi
+    done
+
+    read_by_def "   Enter full path to site (default: $full_path_site): " full_path_site $full_path_site;
+
+    echo -e "\n   Entered data:\n"
+    echo "   Domain: $domain";
+    echo "   Full path site: $full_path_site";
+    echo -e "\n";
+  fi
+
+  action_color="\e[33m ${action} \e[0m"
+
+  while true; do
+    read -r -p "   Do you really want to$(echo -e "${action_color}")File Conversion Server (transformer)? (Y/N): " answer
+    case $answer in
+      [Yy]* ) action_install_or_delete_file_conversion_server; break;;
       [Nn]* ) break;;
       * ) echo "   Please enter Y or N.";;
     esac

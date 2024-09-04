@@ -5,10 +5,10 @@ set -euo pipefail
 # MASTER branch
 
 # use curl
-# bash <(curl -sL https://raw.githubusercontent.com/EduardRe/YogSottot/master/install_full_environment.sh)
+# bash <(curl -sL https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/install_full_environment_fpm.sh)
 
 # use wget
-# bash <(wget -qO- https://raw.githubusercontent.com/EduardRe/YogSottot/master/install_full_environment.sh)
+# bash <(wget -qO- https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/install_full_environment_fpm.sh)
 
 cat > /root/temp_install_full_environment.sh <<\END
 #!/usr/bin/env bash
@@ -132,15 +132,15 @@ cd $DEST_DIR_MENU
 chmod -R +x $DEST_DIR_MENU/$DIR_NAME_MENU
 
 # Check script in .profile and add to .profile if not exist
-#if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
-#  cat << INSTALL_MENU >> /root/.profile
+if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
+  cat << INSTALL_MENU >> /root/.profile
 
 #if [ -n "\$SSH_CONNECTION" ]; then
 #  $FULL_PATH_MENU_FILE
 #fi
 
-#INSTALL_MENU
-#fi
+INSTALL_MENU
+fi
 
 # Configure apache2 modules
 a2enmod remoteip
@@ -268,6 +268,7 @@ echo -e "\n";
 echo "Password for the user ${BS_USER_SERVER_SITES}:";
 echo "${site_user_password}";
 echo -e "\n";
+
 END
 
 bash /root/temp_install_full_environment.sh

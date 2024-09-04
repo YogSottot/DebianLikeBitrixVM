@@ -260,6 +260,24 @@ function action_install_or_delete_sphinx() {
     press_any_key_to_return_menu;
 }
 
+function action_install_or_delete_file_conversion_server() {
+
+    if [ $action = "INSTALL" ]; then
+      echo "Install community.rabbitmq collection";
+      ansible-galaxy collection install community.rabbitmq;
+    fi
+
+    pb=$(realpath "$dir/${BS_PATH_ANSIBLE_PLAYBOOKS}/${BS_ANSIBLE_PB_INSTALL_OR_DELETE_FILE_CONVERSION_SERVER}")
+    ansible-playbook "${pb}" $BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS \
+      -e "file_conversion_server_action=${action} \
+      domain=${domain} \
+      full_path_site=${full_path_site} \
+      user_server_sites=${BS_USER_SERVER_SITES} \
+      group_user_server_sites=${BS_GROUP_USER_SERVER_SITES} \
+      service_apache_name=${BS_SERVICE_APACHE_NAME}"
+    press_any_key_to_return_menu;
+}
+
 function action_delete_site() {
     pb=$(realpath "$dir/${BS_PATH_ANSIBLE_PLAYBOOKS}/${BS_ANSIBLE_PB_DELETE_SITE}")
     ansible-playbook "${pb}" $BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS \

@@ -39,6 +39,19 @@
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
 
+    - name: Extract database name from .settings.php
+      shell: |
+        php -r '
+        $settings = include "{{ path_site_from_links }}/bitrix/.settings.php";
+        echo $settings["connections"]["value"]["default"]["database"];
+        '
+      register: db_name_result
+      changed_when: false
+
+    - name: Set db_name variable
+      set_fact:
+        db_name: "{{ db_name_result.stdout }}"
+
   when: mode == 'link'
 
 ############## FULL MODE ##############
@@ -168,15 +181,17 @@
     mode: "{{ permissions_sites_files }}"
 
 ############## NGINX ##############
-- name: Creating directory from bitrix site settings
+- name: Adding Nginx site_settings directory
   ansible.builtin.file:
+    path: "{{ path_nginx }}/site_settings/{{ domain }}"
     state: directory
-    path: "/etc/{{ service_nginx_name }}/custom_conf.d/site_settings/{{ domain }}"
-    recurse: true
+    owner: root
+    group: root
+    mode: '755'
 
-- name: Adding Nginx configuration file site
+- name: Adding Nginx site_settings file
   ansible.builtin.template:
-    dest: "/etc/{{ service_nginx_name }}/custom_conf.d/site_settings/{{ domain }}/bx_temp.conf"
+    dest: "{{ path_nginx }}/site_settings/{{ domain }}/bx_temp.conf"
     src: "nginx_conf/bx_temp.j2"
     owner: root
     group: root

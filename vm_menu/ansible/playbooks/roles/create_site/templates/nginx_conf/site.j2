@@ -55,7 +55,7 @@ server {
 
     # HERE YOU CAN CONNECT YOUR CONFIG WITH AN SSL CERTIFICATE
     include bx/conf/ssl.conf;
-    include ssl_conf/ssl_{{ domain }}.conf;
+    ## include ssl_conf/ssl_{{ domain }}.conf;
 
     # DONT DELETE THIS PARAMETERS - MANAGED SSL CERTS FROM Lets Encrypt
     # ssl_certificate /path/lets_encrypt/cert/fullchain.pem;
