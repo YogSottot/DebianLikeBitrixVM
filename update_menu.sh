@@ -5,15 +5,16 @@ set +x
 # MASTER branch
 
 # use curl
-# bash <(curl -sL https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/master/update_menu.sh)
+# bash <(curl -sL https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/feature/php-fpm/update_menu.sh)
 
 # use wget
-# bash <(wget -qO- https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/master/update_menu.sh)
+# bash <(wget -qO- https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/feature/php-fpm/update_menu.sh)
 
 cat > /root/temp_update_menu.sh <<\END
 #!/bin/bash
 
-REPO_URL="https://github.com/EduardRe/DebianLikeBitrixVM.git"
+BRANCH="feature/php-fpm"
+REPO_URL="https://github.com/YogSottot/DebianLikeBitrixVM.git"
 
 DIR_NAME_MENU="vm_menu"
 DEST_DIR_MENU="/root"
@@ -35,7 +36,7 @@ mv -f "${DEST_DIR_MENU}/${DIR_NAME_MENU}" "${full_path_backup_menu}"
 
 
 # Clone directory vm_menu with repositories
-git clone --depth 1 --filter=blob:none --sparse $REPO_URL "$DEST_DIR_MENU/DebianLikeBitrixVM"
+git clone --branch=$BRANCH --depth 1 --filter=blob:none --sparse $REPO_URL "$DEST_DIR_MENU/DebianLikeBitrixVM"
 cd "$DEST_DIR_MENU/DebianLikeBitrixVM"
 git sparse-checkout set $DIR_NAME_MENU
 
@@ -50,9 +51,9 @@ chmod -R +x $DEST_DIR_MENU/$DIR_NAME_MENU
 if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
   cat << INSTALL_MENU >> /root/.profile
 
-if [ -n "\$SSH_CONNECTION" ]; then
-  $FULL_PATH_MENU_FILE
-fi
+#if [ -n "\$SSH_CONNECTION" ]; then
+#  $FULL_PATH_MENU_FILE
+#fi
 
 INSTALL_MENU
 fi
