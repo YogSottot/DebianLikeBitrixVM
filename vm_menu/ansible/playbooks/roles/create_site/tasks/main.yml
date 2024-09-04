@@ -238,7 +238,7 @@
 - name: Restarting Nginx
   ansible.builtin.systemd:
     name: "{{ service_nginx_name }}"
-    state: restarted
+    state: reloaded
 
 
 ############## APACHE ##############
@@ -259,4 +259,4 @@
 - name: Restarting Apache
   ansible.builtin.systemd:
     name: "{{ service_apache_name }}"
-    state: restarted
+    state: reloaded
