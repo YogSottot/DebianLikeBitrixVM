@@ -169,6 +169,11 @@ innodb_strict_mode = {{ mysql_innodb_strict_mode }}
 {{ mysql_extra_config }}
 {% endif %}
 
+{% if '8.0.' in mysql_cli_version.stdout %}
+# Disable Percona Telemetry
+percona_telemetry_disable = 1
+{% endif %}
+
 [mysqldump]
 quick
 max_allowed_packet = {{ mysql_mysqldump_max_allowed_packet }}
