@@ -89,4 +89,4 @@
 # Setup alterantives
 - name: Setup alterantives
   ansible.builtin.include_tasks: "setup-alternatives-{{ ansible_os_family }}.yml"
-  when: php_set_manual
+  when: php_set_manual | bool

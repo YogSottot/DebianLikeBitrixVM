@@ -171,34 +171,14 @@ function action_update_server() {
     press_any_key_to_return_menu;
 }
 
-function action_change_php_version() {
-    install_php="${BS_PHP_INSTALL_TEMPLATE[@]}"
-    install_php=$(echo "$install_php" | sed "s/VER#0.0/$new_version_php/g")
-    apt install -y $install_php
+function action_change_php_version(){
+  pb=$(realpath "$dir/${BS_PATH_ANSIBLE_PLAYBOOKS}/${BS_ANSIBLE_PB_ADD_PHP_VERSIONS}")
 
-    wget -q "${BS_DOWNLOAD_BITRIX_CONFIGS}"
-    unzip -o debian.zip && rm debian.zip
-    rsync -a --force ./debian/php.d/ "/etc/php/${new_version_php}/mods-available/"
-    rm -rf ./debian
+  ansible-playbook "${pb}" $BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS \
+  -e "php_version=${new_version_php} \
+  php_set_manual=$((php_set_manual == 1))"
 
-    ln -sf "/etc/php/${new_version_php}/mods-available/zbx-bitrix.ini"  "/etc/php/${new_version_php}/apache2/conf.d/99-bitrix.ini"
-    ln -sf "/etc/php/${new_version_php}/mods-available/zbx-bitrix.ini"  "/etc/php/${new_version_php}/cli/conf.d/99-bitrix.ini"
-
-    # disable all php_modules
-    for module in $(ls "${BS_PATH_APACHE}/mods-enabled" | grep php | sed 's/_module\.load//'); do
-      a2dismod $module
-    done
-
-    a2enmod "php${new_version_php}"
-
-    update-alternatives --set php "/usr/bin/php${new_version_php}"
-    update-alternatives --set phar "/usr/bin/phar${new_version_php}"
-    update-alternatives --set phar.phar "/usr/bin/phar.phar${new_version_php}"
-
-    systemctl restart "${BS_SERVICE_APACHE_NAME}"
-    systemctl restart "${BS_SERVICE_NGINX_NAME}"
-
-    press_any_key_to_return_menu;
+  press_any_key_to_return_menu;
 }
 
 function action_settings_smtp_sites() {

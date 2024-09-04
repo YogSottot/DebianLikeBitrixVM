@@ -646,7 +646,7 @@ then
 	elif [ -f /etc/debian_version ]; then
     # Debian-specific commands
     wget -qO /etc/apt/trusted.gpg.d/php.gpg https://mirror.yandex.ru/mirrors/packages.sury.org/php/apt.gpg
-    echo "deb https://mirror.yandex.ru/mirrors/packages.sury.org/php ${release} main" > /etc/apt/sources.list.d/sury_php.list
+    echo "deb https://mirror.yandex.ru/mirrors/packages.sury.org/php ${release} main" > /etc/apt/sources.list.d/mirror_yandex_ru_mirrors_packages_sury_org_php.list
 	fi
 	
 	apt update

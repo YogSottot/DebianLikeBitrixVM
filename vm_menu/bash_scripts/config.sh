@@ -70,6 +70,7 @@ BS_ANSIBLE_PB_INSTALL_OR_DELETE_NETDATA="install_or_delete_netdata.yaml"
 BS_ANSIBLE_PB_INSTALL_OR_DELETE_SPHINX="install_or_delete_sphinx.yaml"
 BS_ANSIBLE_PB_INSTALL_OR_DELETE_FILE_CONVERSION_SERVER="install_or_delete_file_conversion_server.yaml"
 BS_ANSIBLE_PB_DELETE_SITE="delete_site.yaml"
+BS_ANSIBLE_PB_ADD_PHP_VERSIONS="add_php_version.yaml"
 
 # Data Base
 BS_MAX_CHAR_DB_NAME=20

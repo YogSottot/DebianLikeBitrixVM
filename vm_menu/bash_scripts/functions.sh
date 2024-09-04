@@ -437,10 +437,10 @@ function change_php_version() {
 
     new_version_php=''
     while [[ -z "$new_version_php" ]]; do
-       read_by_def "   Enter PHP version: (example: 8.2 or php8.2): " new_version_php $new_version_php;
-       if [ -z "$new_version_php" ]; then
+        read_by_def "   Enter PHP version: (example: 8.2 or php8.2): " new_version_php $new_version_php;
+        if [ -z "$new_version_php" ]; then
         echo "   Incorrect PHP version! Please enter PHP version";
-       fi
+        fi
     done
 
     new_version_php="${new_version_php^^}"
@@ -448,15 +448,26 @@ function change_php_version() {
 
     echo -e "\n   Selected PHP version: $new_version_php\n"
 
+    php_set_manual=false
     while true; do
-      read -r -p "   Do you really want to change PHP version? (Y/N): " answer
-      case $answer in
-        [Yy]* ) action_change_php_version; break;;
-        [Nn]* ) break;;
+      read -r -p "   Set this version of php as the default version? All sites that use the default version will be switched to this version. (Y/N): " answer
+      case ${answer,,} in
+        y ) php_set_manual=1; break;;
+        n ) php_set_manual=0; break;;
+        * ) echo "   Please enter Y or N.";;
+      esac
+    done
+
+    while true; do
+      read -r -p "   Do you really want to add PHP version? (Y/N): " answer
+      case ${answer,,} in
+        y ) action_change_php_version; break;;
+        n ) break;;
         * ) echo "   Please enter Y or N.";;
       esac
     done
 }
+
 
 function settings_smtp_sites() {
     clear;

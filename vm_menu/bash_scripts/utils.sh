@@ -143,12 +143,13 @@ function  get_ip_current_server() {
 }
 
 function get_current_version_php() {
-    for module in $(ls "${BS_PATH_APACHE}/mods-enabled" | grep php | sed 's/_module\.load//'); do
-      version=$(echo "$module" | sed -e 's/\.conf//' -e 's/\.load//' -e 's/php//')
-      break
-    done
-    echo -e "\n   Current PHP version: $version"
+    default_version=$(update-alternatives --query php | grep 'Value:' | awk '{print $2}' | grep -oP '\d+\.\d+')
+    version_list=$(update-alternatives --list php | grep -oP '\d+\.\d+' | sort -u | tr '\n' ' ')
+    
+    echo -e "\n   Current default PHP version: $default_version"
+    echo -e "   All installed PHP versions: $version_list"
 }
+
 
 function get_available_version_php() {
     echo -e "\n   Available PHP versions:\n"
