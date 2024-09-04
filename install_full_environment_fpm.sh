@@ -5,10 +5,10 @@ set -euo pipefail
 # MASTER branch
 
 # use curl
-# bash <(curl -sL https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/master/install_full_environment.sh)
+# bash <(curl -sL https://raw.githubusercontent.com/EduardRe/YogSottot/master/install_full_environment.sh)
 
 # use wget
-# bash <(wget -qO- https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/master/install_full_environment.sh)
+# bash <(wget -qO- https://raw.githubusercontent.com/EduardRe/YogSottot/master/install_full_environment.sh)
 
 cat > /root/temp_install_full_environment.sh <<\END
 #!/usr/bin/env bash
@@ -29,9 +29,9 @@ generate_password() {
     echo $password
 }
 
-BRANCH="master"
-SETUP_BITRIX_DEBIAN_URL="https://raw.githubusercontent.com/EduardRe/DebianLikeBitrixVM/$BRANCH/repositories/bitrix-gt/custom_from_install_full_environment_bitrix_setup_vanilla.sh"
-REPO_URL="https://github.com/EduardRe/DebianLikeBitrixVM.git"
+BRANCH="feature/php-fpm"
+SETUP_BITRIX_DEBIAN_URL="https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/$BRANCH/repositories/bitrix-gt/bitrix24_gt.sh"
+REPO_URL="https://github.com/YogSottot/DebianLikeBitrixVM"
 
 DB_NAME="bitrix"
 DB_USER="bitrix"
@@ -41,17 +41,57 @@ DEST_DIR_MENU="/root"
 
 FULL_PATH_MENU_FILE="$DEST_DIR_MENU/$DIR_NAME_MENU/menu.sh"
 
+# Function to compare versions
+version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
+
+# Get OS and version information
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+elif [ -f /etc/lsb-release ]; then
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+    VER=$DISTRIB_RELEASE
+fi
+
+# Check if it's Ubuntu 22.04 or less
+if [[ "$OS" == "Ubuntu" && $(echo -e "$VER\n22.04" | sort -V | head -n1) == "$VER" ]]; then
+    apt update -y
+    apt install -y software-properties-common
+    add-apt-repository -y ppa:ondrej/nginx
+fi
 apt update -y
 apt upgrade -y
-apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static
+apt install -y perl wget curl ansible git ssl-cert cron locales locales-all poppler-utils catdoc nginx-light libnginx-mod-http-brotli-filter libnginx-mod-http-brotli-static libnginx-mod-http-headers-more-filter unattended-upgrades software-properties-common webp optipng jpegoptim ghostscript gifsicle
+
+# set timezone
+timedatectl set-timezone Europe/Moscow
 
 # Set locales
 locale-gen en_US.UTF-8
+locale-gen en_GB.UTF-8
+locale-gen en_DK.UTF-8
+locale-gen ru_RU.UTF-8
+locale-gen C.UTF-8
 
-bash -c 'echo "LANG=en_US.UTF-8" > /etc/default/locale'
-bash -c 'echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale'
-
-bash -c 'echo "LC_ALL=\"en_US.UTF-8\"" >> /etc/environment'
+cat > /etc/default/locale <<CONFIG_LOCALE
+LANG=en_GB.UTF-8
+LANGUAGE=
+LC_CTYPE="en_GB.UTF-8"
+LC_NUMERIC="ru_RU.UTF-8"
+LC_TIME="en_DK.UTF-8"
+LC_COLLATE="ru_RU.UTF-8"
+LC_MONETARY="C.UTF-8"
+LC_MESSAGES="en_GB.UTF-8"
+LC_PAPER="ru_RU.UTF-8"
+LC_NAME="ru_RU.UTF-8"
+LC_ADDRESS="ru_RU.UTF-8"
+LC_TELEPHONE="en_GB.UTF-8"
+LC_MEASUREMENT="C.UTF-8"
+LC_IDENTIFICATION="ru_RU.UTF-8"
+LC_ALL=
+CONFIG_LOCALE
 
 source /etc/default/locale
 export LC_ALL="en_US.UTF-8"
@@ -64,18 +104,18 @@ set +x
 set -euo pipefail
 
 # set mysql root password
-root_pass=$(generate_password 24)
+#root_pass=$(generate_password 24)
 site_user_password=$(generate_password 24)
 
-mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${root_pass}');FLUSH PRIVILEGES;"
+#mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${root_pass}');FLUSH PRIVILEGES;"
 
-cat > /root/.my.cnf <<CONFIG_MYSQL_ROOT_MY_CNF
-[client]
-user=root
-password="${root_pass}"
+#cat > /root/.my.cnf <<CONFIG_MYSQL_ROOT_MY_CNF
+#[client]
+#user=root
+#password="${root_pass}"
 # socket=/var/lib/mysqld/mysqld.sock
 
-CONFIG_MYSQL_ROOT_MY_CNF
+#CONFIG_MYSQL_ROOT_MY_CNF
 
 # Clone directory vm_menu with repositories
 git clone --branch=$BRANCH --depth 1 --filter=blob:none --sparse $REPO_URL "$DEST_DIR_MENU/DebianLikeBitrixVM"
@@ -92,30 +132,67 @@ cd $DEST_DIR_MENU
 chmod -R +x $DEST_DIR_MENU/$DIR_NAME_MENU
 
 # Check script in .profile and add to .profile if not exist
-if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
-  cat << INSTALL_MENU >> /root/.profile
+#if ! grep -qF "$FULL_PATH_MENU_FILE" /root/.profile; then
+#  cat << INSTALL_MENU >> /root/.profile
 
-if [ -n "\$SSH_CONNECTION" ]; then
-  $FULL_PATH_MENU_FILE
-fi
+#if [ -n "\$SSH_CONNECTION" ]; then
+#  $FULL_PATH_MENU_FILE
+#fi
 
-INSTALL_MENU
-fi
+#INSTALL_MENU
+#fi
 
-# Enable mod_remoteip
+# Configure apache2 modules
 a2enmod remoteip
+a2enmod rewrite
+a2enmod setenvif
+a2dismod ssl
 
 cat > /etc/apache2/mods-enabled/remoteip.conf <<CONFIG_APACHE2_REMOTEIP
 <IfModule remoteip_module>
- RemoteIPHeader X-Forwarded-For
- RemoteIPInternalProxy 127.0.0.1
+  RemoteIPHeader X-Real-IP
+  RemoteIPInternalProxy 127.0.0.1
 </IfModule>
 CONFIG_APACHE2_REMOTEIP
+
+cat > /etc/apache2/conf-enabled/php.conf <<CONFIG_APACHE2_FASTCGI
+      #
+      # The following lines prevent .user.ini files from being viewed by Web clients.
+      #
+      <Files ".user.ini">
+          <IfModule mod_authz_core.c>
+              Require all denied
+          </IfModule>
+          <IfModule !mod_authz_core.c>
+              Order allow,deny
+              Deny from all
+              Satisfy All
+          </IfModule>
+      </Files>
+
+      # Cause the PHP interpreter to handle files with a .php extension.
+      <FilesMatch "\.php$">
+      #        SetHandler "proxy:fcgi://127.0.0.1:9000"
+              SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
+      #       AddType application/x-httpd-php .php
+      </FilesMatch>
+
+      # Add index.php to the list of files that will be served as directory
+      # indexes.
+
+      DirectoryIndex index.php
+
+      # Uncomment the following line to allow PHP to pretty-print .phps
+      # files as PHP source code:
+      #
+      #AddType application/x-httpd-php-source .phps
+CONFIG_APACHE2_FASTCGI
 
 # set PHP 8.2
 update-alternatives --set php /usr/bin/php8.2
 update-alternatives --set phar /usr/bin/phar8.2
 update-alternatives --set phar.phar /usr/bin/phar.phar8.2
+update-alternatives --set php-fpm.sock /run/php/php8.2-fpm.sock
 
 
 ln -s $FULL_PATH_MENU_FILE "$DEST_DIR_MENU/menu.sh"
@@ -148,6 +225,8 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   db_name=${DB_NAME} \
   db_user=${DB_USER} \
   db_password=${DBPASS} \
+  mysql_character_set_server=${BS_DB_CHARACTER_SET_SERVER} \
+  mysql_collation_server=${BS_DB_COLLATION} \
 
   site_user_password=${site_user_password} \
 
@@ -179,8 +258,8 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
 
   bx_cron_agents_path_file_after_document_root=${BS_BX_CRON_AGENTS_PATH_FILE_AFTER_DOCUMENT_ROOT} \
   bx_cron_logs_path_dir=${BS_BX_CRON_LOGS_PATH_DIR} \
-  bx_cron_logs_path_file=${BS_BX_CRON_LOGS_PATH_FILE} \ 
-  
+  bx_cron_logs_path_file=${BS_BX_CRON_LOGS_PATH_FILE} \
+
   push_server_config=${BS_PUSH_SERVER_CONFIG}"
 
 echo -e "\n\n";
@@ -189,7 +268,6 @@ echo -e "\n";
 echo "Password for the user ${BS_USER_SERVER_SITES}:";
 echo "${site_user_password}";
 echo -e "\n";
-
 END
 
 bash /root/temp_install_full_environment.sh
