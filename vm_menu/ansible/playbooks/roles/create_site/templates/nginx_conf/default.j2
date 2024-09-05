@@ -6,6 +6,10 @@ server {
     server_name _;
     server_name_in_redirect off;
 
+    # logs
+    access_log /var/log/nginx/{{ domain }}_access.log;
+    error_log /var/log/nginx/{{ domain }}_error.log;
+
     # custom conf
     include custom_conf.d/section_listen_http/*.conf;
     include custom_conf.d/section_listen_http_and_https/*.conf;
@@ -52,6 +56,10 @@ server {
 
     server_name _;
     server_name_in_redirect off;
+
+    # logs
+    access_log /var/log/nginx/{{ domain }}_access.log;
+    error_log /var/log/nginx/{{ domain }}_error.log;
 
     # custom conf
     include custom_conf.d/section_listen_https/*.conf;
