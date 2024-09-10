@@ -426,10 +426,10 @@ cronagent(){
 
 dplPush(){
 	cd /opt
-	#wget -q https://repo.bitrix.info/vm/push-server-0.3.0.tgz
-	wget -q https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/repositories/bitrix-gt/push-server-0.3.0.tgz
-	npm install --production ./push-server-0.3.0.tgz
-	rm ./push-server-0.3.0.tgz
+	#wget -q https://repo.bitrix.info/vm/push-server-0.4.0.tgz
+	wget -q https://github.com/YogSottot/DebianLikeBitrixVM/raw/feature/php-fpm/repositories/bitrix-gt/push-server-0.4.0.tgz
+	npm install --production ./push-server-0.4.0.tgz
+	rm ./push-server-0.4.0.tgz
 	ln -sf /opt/node_modules/push-server/etc/push-server /etc/push-server
 
 	cd /opt/node_modules/push-server
