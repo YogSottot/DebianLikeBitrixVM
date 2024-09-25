@@ -7,8 +7,8 @@ server {
     server_name_in_redirect off;
 
     # logs
-    access_log /var/log/nginx/{{ domain }}_access.log;
-    error_log /var/log/nginx/{{ domain }}_error.log;
+    access_log /var/log/nginx/{{ domain }}_access.log main;
+    error_log /var/log/nginx/{{ domain }}_error.log warn;
 
     # custom conf
     include custom_conf.d/section_listen_http/*.conf;
@@ -58,18 +58,17 @@ server {
     server_name_in_redirect off;
 
     # logs
-    access_log /var/log/nginx/{{ domain }}_access.log;
-    error_log /var/log/nginx/{{ domain }}_error.log;
+    access_log /var/log/nginx/{{ domain }}_access.log main;
+    error_log /var/log/nginx/{{ domain }}_error.log warn;
 
     # custom conf
     include custom_conf.d/section_listen_https/*.conf;
     include custom_conf.d/section_listen_http_and_https/*.conf;
 
     ### START PLEASE DONT DELETE OR EDIT THIS COMMENT MANAGED SSL CERTS. YOU CAN MAKE EDITS BETWEEN THESE COMMENTS ###
-
+    include bx/conf/ssl.conf;
     # HERE YOU CAN CONNECT YOUR CONFIG WITH AN SSL CERTIFICATE
     ## include ssl_conf/ssl_{{ domain }}.conf;
-    include bx/conf/ssl.conf;
 
     # DONT DELETE THIS PARAMETERS - MANAGED SSL CERTS FROM Lets Encrypt
     # ssl_certificate /path/lets_encrypt/cert/fullchain.pem;
