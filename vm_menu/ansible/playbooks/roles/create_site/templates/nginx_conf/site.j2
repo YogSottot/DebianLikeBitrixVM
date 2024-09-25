@@ -34,9 +34,6 @@ server {
     index index.php;
     root "{{ path_sites }}/{{ domain }}";
 
-    # Redirect to ssl if need
-    if ($redirect_https) { return 301 https://$host$request_uri; }
-
     # custom options for sites; doesn't changes on update
     include bx/site_settings/{{ domain }}/*.conf;
 
