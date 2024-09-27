@@ -68,7 +68,6 @@
                 {%- elif 'ssl_certificate_key ' in line -%}
                   {%- set line = line.replace(line.split('ssl_certificate_key')[1], ' ' + ssl_cert_key_full_path + ';') -%}
                   {%- set line = line.replace('#', '') -%}
-                {%- endif -%}
                 {%- elif 'ssl_trusted_certificate ' in line -%}
                   {%- set line = line.replace(line.split('ssl_trusted_certificate')[1], ' ' + ssl_trusted_certificate_full_path + ';') -%}
                   {%- set line = line.replace('#', '') -%}
