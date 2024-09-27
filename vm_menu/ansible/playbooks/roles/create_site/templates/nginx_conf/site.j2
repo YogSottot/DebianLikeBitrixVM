@@ -70,8 +70,9 @@ server {
     ## include ssl_conf/ssl_{{ domain }}.conf;
 
     # DONT DELETE THIS PARAMETERS - MANAGED SSL CERTS FROM Lets Encrypt
-    # ssl_certificate /path/lets_encrypt/cert/fullchain.pem;
-    # ssl_certificate_key /path/lets_encrypt/key/privkey.pem;
+    ssl_certificate ssl/cert.pem;
+    ssl_certificate_key ssl/cert.key;
+    # ssl_trusted_certificate /path/lets_encrypt/key/chain.pem;
 
     ### END PLEASE DONT DELETE OR EDIT THIS COMMENT MANAGED SSL CERTS. YOU CAN MAKE EDITS BETWEEN THESE COMMENTS ###
 

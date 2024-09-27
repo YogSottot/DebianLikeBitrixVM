@@ -10,7 +10,6 @@
         certbot certonly --webroot --webroot-path {{ path_site }} --non-interactive --agree-tos --expand --allow-subset-of-names --deploy-hook "systemctl reload nginx" --email {{ email }} -d {{ domain }} {% if is_www == 'Y' %}-d www.{{ domain }}{% endif %}
   args:
     creates: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
-  ignore_errors: true
 
 - name: Searching domain directory
   ansible.builtin.find:
@@ -22,7 +21,6 @@
 - name: Saving founded directory in variable
   ansible.builtin.set_fact:
     cert_full_domain_directory: "{{ found_directory_domain.files | map(attribute='path') | list | first }}"
-  ignore_errors: true
 
 - name: Checking is default site
   ansible.builtin.set_fact:
@@ -40,6 +38,7 @@
       ansible.builtin.set_fact:
         ssl_cert_full_path: "{{ cert_full_domain_directory }}/{{ file_fullchain }}"
         ssl_cert_key_full_path: "{{ cert_full_domain_directory }}/{{ file_privkey }}"
+        ssl_trusted_certificate_full_path: "{{ cert_full_domain_directory }}/{{ file_chain }}"
 
     - name: Loading Nginx configuration
       when: cert_full_domain_directory != "" and real_nginx_config_file.stat.exists
@@ -68,6 +67,10 @@
                   {%- set line = line.replace('#', '') -%}
                 {%- elif 'ssl_certificate_key ' in line -%}
                   {%- set line = line.replace(line.split('ssl_certificate_key')[1], ' ' + ssl_cert_key_full_path + ';') -%}
+                  {%- set line = line.replace('#', '') -%}
+                {%- endif -%}
+                {%- elif 'ssl_trusted_certificate ' in line -%}
+                  {%- set line = line.replace(line.split('ssl_trusted_certificate')[1], ' ' + ssl_trusted_certificate_full_path + ';') -%}
                   {%- set line = line.replace('#', '') -%}
                 {%- endif -%}
             {%- endif -%}
