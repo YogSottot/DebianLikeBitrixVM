@@ -181,6 +181,15 @@
     mode: "{{ permissions_sites_files }}"
 
 ############## NGINX ##############
+- name: Get Nginx version
+  ansible.builtin.command: nginx -v
+  register: nginx_version_output
+  changed_when: false
+
+- name: Extract Nginx version number
+  ansible.builtin.set_fact:
+    nginx_version: "{{ nginx_version_output.stderr | regex_search('\\d+\\.\\d+\\.\\d+') }}"
+
 - name: Adding Nginx site_settings directory
   ansible.builtin.file:
     path: "{{ path_nginx }}/site_settings/{{ domain }}"
