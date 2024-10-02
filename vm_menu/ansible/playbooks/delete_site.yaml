@@ -9,7 +9,6 @@
       file:
         name: "{{ full_path_site }}"
         state: absent
-        recurse: true
 
     - block:
 

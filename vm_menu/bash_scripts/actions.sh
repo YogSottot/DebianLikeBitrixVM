@@ -271,6 +271,7 @@ function action_delete_site() {
 
       service_nginx_name=${BS_SERVICE_NGINX_NAME} \
       path_nginx_sites_conf=${BS_PATH_NGINX_SITES_CONF} \
+      path_nginx_sites_enabled=${BS_PATH_NGINX_SITES_ENABLED} \
 
       service_apache_name=${BS_SERVICE_APACHE_NAME} \
       path_apache_sites_conf=${BS_PATH_APACHE_SITES_CONF}"
