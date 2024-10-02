@@ -1,5 +1,3 @@
 <?php
-$connection = \Bitrix\Main\Application::getConnection();
-
-$connection->queryExecute("SET NAMES '{{ mysql_character_set_server }}'");
-$connection->queryExecute("SET collation_connection = '{{ mysql_collation_server }}'");
+$this->queryExecute("SET NAMES '{{ mysql_character_set_server }}'");
+$this->queryExecute("SET collation_connection = '{{ mysql_collation_server }}'");
