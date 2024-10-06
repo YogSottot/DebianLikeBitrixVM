@@ -26,15 +26,36 @@
         mode: "{{ permissions_sites_dirs }}"
         recurse: true
 
-    - name: Restarting MySQL service
-      ansible.builtin.service:
-        name: mariadb
-        state: restarted
+    - name: Fox owner of user_dir
+      ansible.builtin.file:
+        state: directory
+        path: "{{ path_sites }}"
+        owner: "{{ user_server_sites }}"
+        group: "{{ group_user_server_sites }}"
+        mode: "{{ permissions_sites_dirs }}"
+        recurse: true
+
+    - name: Creating default site directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ document_root }}"
+        owner: "{{ user_server_sites }}"
+        group: "{{ group_user_server_sites }}"
+        mode: "{{ permissions_sites_dirs }}"
+        recurse: true
+
+    - name: Creating default logs site directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ document_root }}/logs"
+        owner: "{{ user_server_sites }}"
+        group: "{{ group_user_server_sites }}"
+        mode: "{{ permissions_sites_dirs }}"
+        recurse: true
 
     - name: Creating array for deleting files
       ansible.builtin.set_fact:
         dell_files: "{{ delete_files.split(',') }}"
-      no_log: true
 
     - name: Deleting files
       ansible.builtin.file:
@@ -45,7 +66,6 @@
     - name: Creating array with urls
       ansible.builtin.set_fact:
         urls: "{{ download_bitrix_install_files_new_site.split(',') }}"
-      no_log: true
 
     - name: Downloading Bitrix scripts
       ansible.builtin.get_url:
@@ -61,7 +81,6 @@
     - name: Creating of downloaded file names array
       ansible.builtin.set_fact:
         file_names_download: "{{ urls | map('basename') | list }}"
-      no_log: true
 
     - name: Generating index.html using links of downloaded files
       ansible.builtin.template:
@@ -70,7 +89,6 @@
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
-      no_log: true
 
     - name: Creating directory bitrix/php_interface
       ansible.builtin.file:
@@ -117,6 +135,14 @@
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
 
+    - name: Adding logrotate file
+      ansible.builtin.template:
+        src: "roles/create_site/templates/logrotate/logrotate.j2"
+        dest: "/etc/logrotate.d/bx_{{ domain }}"
+        owner: "{{ user_server_sites }}"
+        group: "{{ group_user_server_sites }}"
+        mode: "644"
+
     ############## SITE FILES ##############
     - name: Adding .htaccess file
       ansible.builtin.copy:
@@ -127,13 +153,13 @@
         mode: "{{ permissions_sites_files }}"
 
     ############## Systemd ##############
-    - name: Setup PHP settings
-      ansible.builtin.include_role:
-        name: systemd-overrides
+#    - name: Setup PHP settings
+#      ansible.builtin.include_role:
+#        name: systemd-overrides
 
     ############## NGINX ##############
-    - name: Generate ssl-cert and dhparam
-      ansible.builtin.include_tasks: "tasks/ssl_selfsigned.yaml"
+#    - name: Generate ssl-cert and dhparam
+#      ansible.builtin.include_tasks: "tasks/ssl_selfsigned.yaml"
 
     - name: Get Nginx version
       ansible.builtin.command: nginx -v
@@ -180,13 +206,13 @@
         dest: "{{ path_nginx_sites_enabled }}/rtc.conf"
         state: link
 
-    - name: Adding Nginx site_settings directory
+    - name: Adding symlink to Nginx site_settings directory
       ansible.builtin.file:
-        path: "{{ path_nginx }}/site_settings/{{ domain }}"
-        state: directory
+        src: "/etc/{{ service_nginx_name }}/custom_conf.d/site_settings"
+        dest: "{{ path_nginx }}/site_settings"
         owner: root
         group: root
-        mode: '755'
+        state: link
 
     - name: Adding Nginx site_settings file
       ansible.builtin.template:
@@ -223,14 +249,14 @@
         state: restarted
 
     ############## PHP-FPM ##############
-    - name: Setup PHP settings
-      ansible.builtin.include_role:
-        name: geerlingguy.php
+#    - name: Setup PHP settings
+#      ansible.builtin.include_role:
+#        name: geerlingguy.php
 
     ############## MySQL ##############
-    - name: Setup MySQL settings
-      ansible.builtin.include_role:
-        name: geerlingguy.mysql
+#    - name: Setup MySQL settings
+#      ansible.builtin.include_role:
+#        name: geerlingguy.mysql
 
 # Change site user for connection SSH
     - name: Installing of python3-passlib

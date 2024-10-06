@@ -1,0 +1,9 @@
+---
+- name: "Setup bashrc"
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: false
+  roles:
+    - name: Setup bashrc
+      role: bashrc

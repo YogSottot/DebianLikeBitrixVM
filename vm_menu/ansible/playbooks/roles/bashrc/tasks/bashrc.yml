@@ -1,0 +1,32 @@
+---
+# - name: Copy sh in /etc/profile.d
+#  ansible.builtin.copy:
+#    src: "profile.d/"
+#    dest: "/etc/profile.d/"
+#    owner: root
+#    group: root
+#    mode: '0644'
+
+- name: Copy bash-config in /etc/skel
+  ansible.builtin.copy:
+    src: "bashrc/"
+    dest: "/etc/skel/"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy bash-config in /root/
+  ansible.builtin.copy:
+    src: "bashrc/"
+    dest: "/root/"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Copy bash-config in {{ user_server_sites }}"
+  ansible.builtin.copy:
+    src: "bashrc/"
+    dest: "{{ path_sites }}/"
+    owner: "{{ user_server_sites }}"
+    group: "{{ group_user_server_sites }}"
+    mode: '0644'

@@ -6,7 +6,7 @@ DocumentRoot  {{ document_root }}
 
 ErrorLog ${APACHE_LOG_DIR}/error_log
 LogLevel warn
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    #CustomLog ${APACHE_LOG_DIR}/access.log combined
 
 <IfModule mod_rewrite.c>
 	#Nginx should have "proxy_set_header HTTPS YES;" in location

@@ -1,0 +1,55 @@
+---
+- name: Create site map config
+  ansible.builtin.template:
+    src: nginx_site_map.conf.j2
+    dest: "{{ path_nginx }}/maps/{{ item.CompositeNginxID }}.cache_{{ domain }}.conf"
+    owner: root
+    group: root
+    mode: '0664'
+  tags: configure_site
+  with_items: "{{ bx_sites_info }}"
+  when: enable_composite
+  notify: "Reload {{ service_nginx_name }}"
+
+- name: Delete site map config
+  ansible.builtin.file:
+    dest: "{{ path_nginx }}/maps/{{ item.CompositeNginxID }}.cache_{{ domain }}.conf"
+    state: absent
+  tags: configure_site
+  with_items: "{{ bx_sites_info }}"
+  when: not enable_composite
+  notify: "Reload {{ service_nginx_name }}"
+
+- name: Update site http config
+  ansible.builtin.template:
+    src: http_site_template_composite.conf.j2
+    dest: "{{ item.NginxHTTPDir }}/{{ item.NginxHTTPConfig }}"
+    owner: root
+    group: root
+    mode: '0664'
+  tags: configure_site
+  with_items: "{{ bx_sites_info }}"
+  when: enable_composite
+  notify: "Reload {{ service_nginx_name }}"
+
+- name: Adding Nginx configuration file
+  ansible.builtin.template:
+    dest: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
+    src: "http_site_template_composite.conf.j2"
+    owner: root
+    group: root
+    mode: '0644'
+  tags: configure_site
+  with_items: "{{ bx_sites_info }}"
+  when: enable_composite
+  notify: "Reload {{ service_nginx_name }}"
+
+- name: Creating symbol link (site_enable) for Nginx configuration file
+  ansible.builtin.file:
+    src: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
+    dest: "{{ path_nginx_sites_enabled }}/{{ domain }}.conf"
+    state: link
+  tags: configure_site
+  with_items: "{{ bx_sites_info }}"
+  when: enable_composite
+  notify: "Reload {{ service_nginx_name }}"

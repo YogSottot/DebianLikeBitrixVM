@@ -1,0 +1,9 @@
+---
+- name: "Setup postfix"
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+  roles:
+    - name: Setup postfix
+      role: postfix

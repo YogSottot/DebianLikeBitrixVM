@@ -1,0 +1,9 @@
+---
+- name: "Setup repos"
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+  roles:
+    - name: Setup repos
+      role: setup_repositories

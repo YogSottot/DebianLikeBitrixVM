@@ -20,15 +20,15 @@ php_packages_state: present
 php_install_recommends: false
 
 # Set this to false if you're not using PHP with Apache/Nginx/etc.
-php_enable_webserver: false
+php_enable_webserver: true
 
 # PHP-FPM configuration.
 php_enable_php_fpm: true
 php_fpm_state: started
 php_fpm_handler_state: restarted
 php_fpm_enabled_on_boot: true
-php_fpm_pool_user: "www-data"
-php_fpm_pool_group: "www-data"
+php_fpm_pool_user: "{{ user_server_sites }}"
+php_fpm_pool_group: "{{ group_user_server_sites }}"
 php_fpm_listen: "/run/php/php{{ php_default_version_debian }}-fpm.sock"
 php_fpm_listen_allowed_clients: "127.0.0.1"
 php_fpm_pm_max_children: "{{ (ansible_memtotal_mb // 2) // 32 | int | abs }}"
@@ -111,7 +111,7 @@ php_upload_max_filesize: "1024M"
 php_max_file_uploads: "100"
 
 php_post_max_size: "1024M"
-php_date_timezone: "{{ timesync_timezone }}"
+php_date_timezone: "{{ server_timezone }}"
 php_allow_url_fopen: "On"
 
 php_sendmail_path: "sendmail -t -i"
@@ -136,4 +136,3 @@ php_upload_tmp_dir: "/tmp/"
 # Install PHP from source (instead of using a package manager) with these vars.
 php_install_from_source: false
 php_use_managed_ini: false
-timesync_timezone: Europe/Moscow

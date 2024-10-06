@@ -17,6 +17,7 @@
     mode: "0644"
   loop: "{{ systemd_overrides_unit }}"
   register: systemd_overrides_config_changed
+  notify: Daemon_reload
 
 - name: Ensure configuration
   ansible.builtin.template:
@@ -25,6 +26,8 @@
     owner: root
     group: root
     mode: "0644"
+  register: systemd_overrides_config_changed
+  notify: Daemon_reload
 
 - name: Ensure configuration path exist
   ansible.builtin.file:
@@ -33,6 +36,8 @@
     owner: root
     group: root
     mode: "0644"
+  register: systemd_overrides_config_changed
+  notify: Daemon_reload
 
 - name: Ensure configuration
   ansible.builtin.template:
@@ -42,8 +47,4 @@
     group: root
     mode: "0644"
   register: systemd_overrides_config_changed
-
-- name: Force systemd to reread configs
-  ansible.builtin.systemd:
-    daemon_reload: true
-  when: systemd_overrides_config_changed | bool
+  notify: Daemon_reload

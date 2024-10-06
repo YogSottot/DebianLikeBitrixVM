@@ -12,6 +12,7 @@ BS_PERMISSIONS_SITES_DIRS="0775"
 BS_PERMISSIONS_SITES_FILES="0664"
 BS_EXCLUDED_DIRS_SITES=(".bx_temp" "temp" "tmp" "test" ".ssh")
 BS_SITE_LINKS_RESOURCES=("local" "bitrix" "upload" "images")
+BS_SERVER_TIMEZONE="Europe/Moscow"
 BS_DOWNLOAD_BITRIX_INSTALL_FILES_NEW_SITE=(
   "https://www.1c-bitrix.ru/download/scripts/bitrixsetup.php"
   "https://www.1c-bitrix.ru/download/scripts/restore.php"
@@ -25,6 +26,7 @@ BS_BX_CRON_LOGS_PATH_DIR="/var/log/bitrix_cron_agents"
 BS_BX_CRON_LOGS_PATH_FILE="agents_cron.log"
 
 # PHP configs (VER#0.0 - it will be automatically replaced when the version is selected)
+BX_PHP_DEFAULT_VERSION="8.2"
 BS_PHP_INSTALL_TEMPLATE=(
   "phpVER#0.0"
   "phpVER#0.0-bcmath"
@@ -71,11 +73,21 @@ BS_ANSIBLE_PB_INSTALL_OR_DELETE_SPHINX="install_or_delete_sphinx.yaml"
 BS_ANSIBLE_PB_INSTALL_OR_DELETE_FILE_CONVERSION_SERVER="install_or_delete_file_conversion_server.yaml"
 BS_ANSIBLE_PB_DELETE_SITE="delete_site.yaml"
 BS_ANSIBLE_PB_ADD_PHP_VERSIONS="add_php_version.yaml"
+BS_ANSIBLE_PB_INSTALL_DEPS="install_deps.yaml"
+BS_ANSIBLE_PB_INITIAL_SETUP="initial_setup.yaml"
+BS_ANSIBLE_PB_SETUP_REPOS="setup_repos.yaml"
+BS_ANSIBLE_PB_SETUP_BASHRC="setup_bashrc.yaml"
+BS_ANSIBLE_PB_SETUP_POSTFIX="setup_postfix.yaml"
 
 # Data Base
 BS_MAX_CHAR_DB_NAME=20
 BS_MAX_CHAR_DB_USER=20
 BS_CHAR_DB_PASSWORD=24
+# (mariadb / percona)
+BS_DB_FLAVOR=mariadb
+# percona version (5.7 / 8.0)
+# mariadb version (5.5 / 10.11)
+BS_DB_VERSION=10.11
 BS_DB_CHARACTER_SET_SERVER=utf8mb4
 BS_DB_COLLATION=utf8mb4_general_ci
 
@@ -117,3 +129,5 @@ BS_MYSQL_CMD="mysql"
 
 # Push-server configs
 BS_PUSH_SERVER_CONFIG=/etc/default/push-server-multi
+# Do not run push-server by default
+BS_PUSH_SERVER_STOPPED=false

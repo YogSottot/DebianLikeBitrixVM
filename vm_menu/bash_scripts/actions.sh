@@ -174,9 +174,10 @@ function action_update_server() {
 function action_change_php_version(){
   pb=$(realpath "$dir/${BS_PATH_ANSIBLE_PLAYBOOKS}/${BS_ANSIBLE_PB_ADD_PHP_VERSIONS}")
 
-  ansible-playbook "${pb}" $BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS \
+  ansible-playbook "${pb}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
   -e "php_version=${new_version_php} \
-  php_set_manual=$((php_set_manual == 1))"
+  php_set_manual=$((php_set_manual == 1))
+  server_timezone=${BS_SERVER_TIMEZONE}"
 
   press_any_key_to_return_menu;
 }

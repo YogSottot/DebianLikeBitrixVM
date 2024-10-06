@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+
+{% for locale in locales_to_configure %}
+{% if (locale.modifier | default('')) == '' %}
+{{ locale.name }}
+{% else %}
+{{ locale.name }} {{ locale.modifier }}
+{% endif %}
+{% endfor %}

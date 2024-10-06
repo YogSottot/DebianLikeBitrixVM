@@ -206,6 +206,14 @@
     group: root
     mode: '644'
 
+- name: Copying default configs to site_settings
+  ansible.builtin.copy:
+    src: "nginx_files/custom_conf.d/site_settings/default/*.conf"
+    dest: "{{ path_nginx }}/site_settings/{{ domain }}/"
+    owner: root
+    group: root
+    mode: '644'
+
 - name: Copying ssl_default.conf to ssl_{{ domain }}.conf
   ansible.builtin.copy:
     src: "nginx_files/ssl_conf/ssl_default.conf"
@@ -269,3 +277,22 @@
   ansible.builtin.systemd:
     name: "{{ service_apache_name }}"
     state: reloaded
+
+############## Logrotate ##############
+
+- name: Creating logs directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ document_root }}/logs"
+    owner: "{{ user_server_sites }}"
+    group: "{{ group_user_server_sites }}"
+    mode: "{{ permissions_sites_dirs }}"
+    recurse: true
+
+- name: Adding logrotate file
+  ansible.builtin.template:
+    src: "roles/create_site/templates/logrotate/logrotate.j2"
+    dest: "/etc/logrotate.d/{{ domain }}"
+    owner: "{{ user_server_sites }}"
+    group: "{{ group_user_server_sites }}"
+    mode: "644"

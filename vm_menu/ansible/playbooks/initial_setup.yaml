@@ -1,0 +1,24 @@
+---
+- name: Setup initial software for environment
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+  vars:
+    bx_temporary_files_directory: "{{ path_sites }}/.bx_temp/{{ db_name }}/"
+
+  roles:
+    - infOpen.locales
+#    - Oefenweb.user
+    - marcelnijenhof.firewalld
+    - systemd-overrides
+    - geerlingguy.nginx
+    - geerlingguy.nginx_config
+    - geerlingguy.php-versions
+    - geerlingguy.apache
+    - geerlingguy.php
+    - geerlingguy.apache-php-fpm
+    - geerlingguy.mysql
+    - geerlingguy.redis
+    - bx_push_server
+#    - tmpfiles

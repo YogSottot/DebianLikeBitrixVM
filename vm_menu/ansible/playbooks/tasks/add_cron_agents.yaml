@@ -18,3 +18,52 @@
     weekday: "*"
     job: "test -f {{ path_file_run_cron }} && php -f {{ path_file_run_cron }} > {{ logs_path_dir }}/site_{{ domain }}_{{ logs_path_file }} 2>&1"
     user: "{{ user_site }}"
+    cron_file: "bx_agent_{{ db_name }}"
+
+- name: Adding cron job for bitrix imopenlines agents the site {{ domain }}
+  ansible.builtin.cron:
+    name: Adding cron bitrix imopenlines agents site {{ domain }}
+    minute: "*"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "test -f {{ document_root }}/bitrix/tools/imopenlines/agents.php && php -f {{ document_root }}/bitrix/tools/imopenlines/agents.php > /dev/null 2>&1"
+    user: "{{ user_site }}"
+    cron_file: "bx_agent_{{ db_name }}"
+
+- name: Adding cron job for dev2fun optimize agents the site {{ domain }}
+  ansible.builtin.cron:
+    name: Adding cron dev2fun optimize agents site {{ domain }}
+    minute: "*/5"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/optimize.php && php -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/optimize.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_optimize.log 2>&1"
+    user: "{{ user_site }}"
+    cron_file: "bx_agent_{{ db_name }}"
+
+- name: Adding cron job for dev2fun convert agents the site {{ domain }}
+  ansible.builtin.cron:
+    name: Adding cron dev2fun convert agents site {{ domain }}
+    minute: "*/5"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/convert.php && php -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/convert.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_convert.log 2>&1"
+    user: "{{ user_site }}"
+    cron_file: "bx_agent_{{ db_name }}"
+
+- name: Adding cron job for dev2fun cache clean agents the site {{ domain }}
+  ansible.builtin.cron:
+    name: Adding cron dev2fun cache clean agents site {{ domain }}
+    minute: "*/5"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/cache-delayed-delete.php && php -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/cache-delayed-delete.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_cache_clean.log 2>&1"
+    user: "{{ user_site }}"
+    cron_file: "bx_agent_{{ db_name }}"

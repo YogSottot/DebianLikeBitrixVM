@@ -1,10 +1,17 @@
 ---
-php_default_version_debian: "8.2"
 systemd_overrides_config_file_path: /etc/systemd/system/
 systemd_overrides_unit:
    - apache2
+   - httpd
    - memcached
+   - mysql
+   - mysqld
    - mariadb
    - nginx
+   - php-fpm
    - php{{ php_default_version_debian }}-fpm
    - redis
+   - transformer
+   - unattended-upgrades
+
+systemd_overrides_redis_group: "{{ nginx_user }}"
