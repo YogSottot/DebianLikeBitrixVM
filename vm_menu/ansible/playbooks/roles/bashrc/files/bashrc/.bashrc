@@ -19,7 +19,11 @@ shopt -s histappend
 # https://askubuntu.com/questions/80371/bash-history-handling-with-multiple-terminals
 # After each command, append to the history file and reread it
 # https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history
-PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"
+function historymerge {
+    history -n; history -w; history -c; history -r;
+}
+trap historymerge EXIT
+PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
 
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)

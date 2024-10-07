@@ -208,7 +208,7 @@
 
 - name: Copying default configs to site_settings
   ansible.builtin.copy:
-    src: "nginx_files/custom_conf.d/site_settings/default/*.conf"
+    src: "nginx_files/custom_conf.d/site_settings/default/"
     dest: "{{ path_nginx }}/site_settings/{{ domain }}/"
     owner: root
     group: root
