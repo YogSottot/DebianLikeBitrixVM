@@ -57,6 +57,11 @@ action_create_site(){
   push_server_config=${BS_PUSH_SERVER_CONFIG} \
 
   pb_redirect_http_to_https=${pb_redirect_http_to_https} \
+
+  php_version=${new_version_php} \
+  php_current_default_version=${default_version} \
+  server_timezone=${BS_SERVER_TIMEZONE} \
+
   ansible_run_playbooks_params=${BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS}"
 
   press_any_key_to_return_menu;
@@ -176,6 +181,7 @@ function action_change_php_version(){
 
   ansible-playbook "${pb}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
   -e "php_version=${new_version_php} \
+  php_current_default_version=${default_version} \
   php_set_manual=$((php_set_manual == 1)) \
   user_server_sites=${BS_USER_SERVER_SITES} \
   group_user_server_sites=${BS_GROUP_USER_SERVER_SITES} \

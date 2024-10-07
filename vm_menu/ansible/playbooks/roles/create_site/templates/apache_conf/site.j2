@@ -82,4 +82,11 @@ LogLevel warn
 		AddType text/plain php,php3,php4,php5,php6,phtml,pl,asp,aspx,cgi,dll,exe,ico,shtm,shtml,fcg,fcgi,fpl,asmx,pht
 	</Directory>
 
+{% if php_version != php_current_default_version %}
+	# Cause the PHP interpreter to handle files with a .php extension.
+	<FilesMatch "\.php$">
+		SetHandler "proxy:unix:/run/php/php{{ php_version }}-fpm.sock|fcgi://localhost"
+	</FilesMatch>
+{% endif %}
+
 </VirtualHost>

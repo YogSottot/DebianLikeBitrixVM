@@ -159,6 +159,7 @@ add_site(){
     db_user=''
     db_password=$(generate_password $BS_CHAR_DB_PASSWORD)
     path_site_from_links=$BS_PATH_DEFAULT_SITE
+    new_version_php=''
 
     ssl_lets_encrypt="N";
     ssl_lets_encrypt_www="Y";
@@ -177,6 +178,16 @@ add_site(){
     done
 
     ssl_lets_encrypt_email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
+
+    while [[ -z "$new_version_php" ]]; do
+        read_by_def "   Enter PHP version for site from installed: (example: 8.2): " new_version_php $new_version_php;
+        if [ -z "$new_version_php" ]; then
+        echo "   Incorrect PHP version! Please enter PHP version";
+        fi
+          new_version_php="${new_version_php^^}"
+          new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
+          echo -e "\n   Selected PHP version: $new_version_php\n"
+    done
 
     while true; do
         read -r -p "   Enter site mode link or full: " mode
