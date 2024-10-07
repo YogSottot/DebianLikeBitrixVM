@@ -176,7 +176,9 @@ function action_change_php_version(){
 
   ansible-playbook "${pb}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
   -e "php_version=${new_version_php} \
-  php_set_manual=$((php_set_manual == 1))
+  php_set_manual=$((php_set_manual == 1)) \
+  user_server_sites=${BS_USER_SERVER_SITES} \
+  group_user_server_sites=${BS_GROUP_USER_SERVER_SITES} \
   server_timezone=${BS_SERVER_TIMEZONE}"
 
   press_any_key_to_return_menu;
