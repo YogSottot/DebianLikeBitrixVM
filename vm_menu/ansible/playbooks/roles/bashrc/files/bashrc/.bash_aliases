@@ -83,8 +83,8 @@ alias lsd='lsd --color=never'
 # https://github.com/sharkdp/fd
 alias fd='fd-find'
 
-# bat instead of cat
-alias cat='batcat --theme "Solarized (dark)"'
+# bat instead of batcat
+alias bat='batcat --theme "Solarized (dark)"'
 # duf color
 alias duf='duf -theme ansi'
 # gdu no color
