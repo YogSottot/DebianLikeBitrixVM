@@ -21,6 +21,8 @@ list_sites(){
   ARR_ALL_DIR_SITES=()
   echo -e "   List of sites dirs: \n";
 
+  get_current_version_php
+
   # Функция для заполнения массива данными
   fill_array() {
     local index=0
@@ -48,6 +50,24 @@ list_sites(){
         ARR_ALL_DIR_SITES_DATA[$index,is_https]="Y"
       fi
 
+      # Add PHP version information
+      local site_config="/etc/apache2/sites-enabled/${tmp_dir}.conf"
+
+      if [ -f "$site_config" ]; then
+        php_version=$(grep -oP 'php\K[\d.]+(?=-fpm\.sock)' "$site_config")
+
+        if [ -z "$php_version" ]; then
+          php_version=$default_version
+          ARR_ALL_DIR_SITES_DATA[$index,php_default]="Y"
+        else
+          ARR_ALL_DIR_SITES_DATA[$index,php_default]=$([ "$php_version" == "$default_version" ] && echo "Y" || echo "N")
+        fi
+        ARR_ALL_DIR_SITES_DATA[$index,php_version]="$php_version"
+      else
+        ARR_ALL_DIR_SITES_DATA[$index,php_version]="N/A"
+        ARR_ALL_DIR_SITES_DATA[$index,php_default]="N/A"
+      fi
+
       ((index++))
     done
   }
@@ -57,27 +77,34 @@ list_sites(){
     printf "   +"
     for i in {1..20}; do printf "-"; done
     printf "+"
-    for i in {1..30}; do printf "-"; done
+    for i in {1..21}; do printf "-"; done
     printf "+"
-    for i in {1..40}; do printf "-"; done
+    for i in {1..16}; do printf "-"; done
     printf "+"
-    for i in {1..45}; do printf "-"; done
-    printf "+\n"
+    for i in {1..25}; do printf "-"; done
+    printf "+"
+    for i in {1..26}; do printf "-"; done
+    printf "+"
+    for i in {1..13}; do printf "-"; done
+    printf "+"
+    for i in {1..18}; do printf "-"; done
+    printf "+"
   }
 
   # Функция для вывода таблицы
   print_table() {
     print_line
-    printf "   | %-40s | %-15s | %-18s | %-50s |\n" "Directory site" "Default site" "Redirect to HTTPS" "Document root"
+    printf "   | %-40s | %-12s | %-50s | %-10s | %-16s |\n" "Directory site" "Redirect HTTPS" "Document root" "PHP Version" "Default PHP"
     print_line
 
     local index=0
     while [[ -n "${ARR_ALL_DIR_SITES_DATA["${index}_dir"]}" ]]; do
-      printf "   | %-40s | %-15s | %-18s | %-50s |\n" \
+      printf "   | %-40s | %-14s | %-50s | %-11s | %-16s |\n" \
         "${ARR_ALL_DIR_SITES_DATA["${index}_dir"]}" \
-        "${ARR_ALL_DIR_SITES_DATA[$index,is_default]}" \
         "${ARR_ALL_DIR_SITES_DATA[$index,is_https]}" \
-        "${ARR_ALL_DIR_SITES_DATA[$index,doc_root]}"
+        "${ARR_ALL_DIR_SITES_DATA[$index,doc_root]}" \
+        "${ARR_ALL_DIR_SITES_DATA[$index,php_version]}" \
+        "${ARR_ALL_DIR_SITES_DATA[$index,php_default]}"
       print_line
       ((index++))
     done
@@ -87,6 +114,7 @@ list_sites(){
   print_table
   get_current_version_php
 }
+
 
 press_any_key_to_return_menu(){
     echo -e "\n";
