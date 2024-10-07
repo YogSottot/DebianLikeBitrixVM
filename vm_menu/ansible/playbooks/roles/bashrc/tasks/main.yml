@@ -28,5 +28,8 @@
 - name: Htop setup
   ansible.builtin.include_tasks: htop.yml
 
+- name: Lnav setup
+  ansible.builtin.include_tasks: lnav.yml
+
 - name: Liquidprompt setup
   ansible.builtin.include_tasks: liquidprompt.yml
