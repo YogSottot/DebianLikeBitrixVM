@@ -81,7 +81,7 @@ alias lt='exa -lahFT --time-style long-iso --icons -L '
 alias lsd='lsd --color=never'
 
 # https://github.com/sharkdp/fd
-alias fd='fd-find'
+alias fd='fdfind'
 
 # bat instead of batcat
 alias bat='batcat --theme "Solarized (dark)"'
