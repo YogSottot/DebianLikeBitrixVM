@@ -179,16 +179,6 @@ add_site(){
 
     ssl_lets_encrypt_email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
 
-        # Choose php version for site
-        read_by_def "   Enter PHP version for site from installed (default: $default_version): " new_version_php "$new_version_php";
-        if [ -z "$new_version_php" ]; then
-        echo "   Incorrect PHP version! Please enter PHP version";
-        fi
-          new_version_php="${new_version_php^^}"
-          new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
-          echo -e "\n   Selected PHP version: $new_version_php\n"
-
-
     while true; do
         read -r -p "   Enter site mode link or full: " mode
         case $mode in
@@ -204,6 +194,15 @@ add_site(){
         export db_name=$(php -r '$settings = include "'$path_site_from_links'/bitrix/.settings.php"; echo $settings["connections"]["value"]["default"]["database"];')
       ;;
       full )
+          # Choose php version for site
+          read_by_def "   Enter PHP version for site from installed (default: $default_version): " new_version_php "$new_version_php";
+          if [ -z "$new_version_php" ]; then
+          echo "   Incorrect PHP version! Please enter PHP version";
+          fi
+            new_version_php="${new_version_php^^}"
+            new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
+            echo -e "\n   Selected PHP version: $new_version_php\n"
+
           while true; do
             db_name=$(sanitize_name "db_$domain" "$BS_MAX_CHAR_DB_NAME")
             db_user=$(sanitize_name "usr_$domain" "$BS_MAX_CHAR_DB_USER")
