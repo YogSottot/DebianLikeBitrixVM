@@ -5,7 +5,7 @@ ServerAdmin webmaster@localhost
 
 DocumentRoot  {{ path_sites }}/{{ domain }}
 
-ErrorLog ${APACHE_LOG_DIR}/error_log
+ErrorLog ${APACHE_LOG_DIR}/{{ domain }}_error.log
 LogLevel warn
     #CustomLog ${APACHE_LOG_DIR}/access.log combined
 
@@ -82,10 +82,16 @@ LogLevel warn
 		AddType text/plain php,php3,php4,php5,php6,phtml,pl,asp,aspx,cgi,dll,exe,ico,shtm,shtml,fcg,fcgi,fpl,asmx,pht
 	</Directory>
 
-{% if php_version != php_current_default_version %}
+{% if php_version != php_current_default_version and user_server_sites in ['www-data', 'bitrix'] %}
 	# Cause the PHP interpreter to handle files with a .php extension.
 	<FilesMatch "\.php$">
-		SetHandler "proxy:unix:/run/php/php{{ php_version }}-fpm.sock|fcgi://localhost"
+		SetHandler "proxy:unix:{{ php_fpm_listen }}|fcgi://localhost"
+	</FilesMatch>
+{% endif %}
+{% if user_server_sites not in ['www-data', 'bitrix'] %}
+	# Cause the PHP interpreter to handle files with a .php extension.
+	<FilesMatch "\.php$">
+		SetHandler "proxy:unix:{{ php_fpm_listen }}|fcgi://localhost"
 	</FilesMatch>
 {% endif %}
 

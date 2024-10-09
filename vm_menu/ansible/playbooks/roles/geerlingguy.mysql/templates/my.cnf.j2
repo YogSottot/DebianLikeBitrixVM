@@ -88,7 +88,7 @@ performance_schema = {{ mysql_performance_schema }}
 key_buffer_size = {{ mysql_key_buffer_size | default(([ansible_memtotal_mb // 16, 16] | min ~ 'M')) }}
 max_allowed_packet = {{ mysql_max_allowed_packet | default(([ansible_memtotal_mb // 64, 64] | min ~ 'M')) }}
 table_open_cache = {{ mysql_table_open_cache | default(mysql_config.table_open_cache) }}
-{% if mysql_flavor == mariadb %}
+{% if mysql_flavor == 'mariadb' %}
 table_definition_cache = {{ mysql_table_definition_cache }}
 {% endif %}
 sort_buffer_size = {{ mysql_sort_buffer_size | default(mysql_config.sort_buffer_size | string + 'M') }}

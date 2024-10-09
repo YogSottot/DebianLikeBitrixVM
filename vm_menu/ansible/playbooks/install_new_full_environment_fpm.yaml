@@ -240,7 +240,7 @@
     - name: Creating symbol link (site_enable) for Apache configuration file
       ansible.builtin.file:
         src: "{{ path_apache_sites_conf }}/default.conf"
-        dest: "{{ path_apache_sites_enabled }}/default.conf"
+        dest: "{{ path_apache_sites_enabled }}/bx-site.conf"
         state: link
 
     - name: Restarting Apache
@@ -249,9 +249,9 @@
         state: restarted
 
     ############## PHP-FPM ##############
-#    - name: Setup PHP settings
-#      ansible.builtin.include_role:
-#        name: geerlingguy.php
+    - name: Setup PHP settings
+      ansible.builtin.include_role:
+        name: tmpfiles
 
     ############## MySQL ##############
 #    - name: Setup MySQL settings

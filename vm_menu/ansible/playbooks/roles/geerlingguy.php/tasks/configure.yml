@@ -31,6 +31,40 @@
   notify: restart webserver
   when: php_use_managed_bitrixenv_ini
 
+- name: Make z_bx_custom.ini file
+  ansible.builtin.file:
+    path: "/etc/php/{{ php_default_version_debian }}/cli/conf.d/z_bx_custom.ini"
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+  when: php_use_managed_bitrixenv_ini
+
+- name: Adding symlink to z_bx_custom.ini
+  ansible.builtin.file:
+    src: "/etc/php/{{ php_default_version_debian }}/cli/conf.d/z_bx_custom.ini"
+    dest: "/etc/php/{{ php_default_version_debian }}/fpm/conf.d/z_bx_custom.ini"
+    owner: root
+    group: root
+    state: link
+  when: php_use_managed_bitrixenv_ini
+
+- name: Make sessions settings file
+  ansible.builtin.blockinfile:
+    path: "{{ item }}/sessions_settings.ini"
+    marker: "; {mark} {{ document_root }} "
+    block: |
+      [PATH={{ document_root }}]
+      session.save_path = {{ php_session_save_path }}
+      upload_tmp_dir = {{ php_upload_tmp_dir }}
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  when: not php_use_managed_bitrixenv_ini
+  notify: restart php-fpm
+  with_items: "{{ php_extension_conf_paths }}"
+
 - name: Make directory for logs
   ansible.builtin.file:
     path: /var/log/php-fpm/
@@ -38,3 +72,4 @@
     recurse: true
     owner: "{{ php_fpm_pool_user }}"
     group: "{{ php_fpm_pool_group }}"
+    mode: "0777"

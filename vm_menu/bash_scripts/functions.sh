@@ -44,7 +44,7 @@ main_menu(){
     echo "          3) Configure Let\`s Encrypt certificate";
     echo "          4) Enable or Disable redirect HTTP to HTTPS";
     echo "          5) ${mesg_menu_emulate_bitrix_vm}";
-    echo "          6) Change PHP version";
+    echo "          6) Add/Change PHP version";
     echo "          7) Settings SMTP sites";
     echo "          8) Installing Extensions";
     echo "          9) Update server";
@@ -149,6 +149,22 @@ generate_random_hash() {
     printf "%s" "$hash"
 }
 
+# Generate username
+generate_unique_username() {
+    local prefix="user"
+    local counter=1
+    local username
+
+    while true; do
+        username=$(printf "%s%04d" "$prefix" "$counter")
+        if ! id "$username" &>/dev/null; then
+            echo "$username"
+            return
+        fi
+        ((counter++))
+    done
+}
+
 add_site(){
     clear;
     list_sites;
@@ -192,6 +208,36 @@ add_site(){
       link )
         read_by_def "   Enter path to links site (default: $path_site_from_links): " path_site_from_links $path_site_from_links;
         export db_name=$(php -r '$settings = include "'$path_site_from_links'/bitrix/.settings.php"; echo $settings["connections"]["value"]["default"]["database"];')
+
+        # Extract domain name from link
+        main_domain=$(basename "$path_site_from_links")
+
+        # Extract PHP version from link
+        local site_config="${BS_PATH_APACHE_SITES_ENABLED}/${main_domain}.conf"
+
+        if [ -f "$site_config" ]; then
+          new_version_php=$(grep -oP 'php\K[\d.]+(?=-(?:user\d+)?-?fpm\.sock)' "$site_config")
+          if [ -z "$new_version_php" ]; then
+            new_version_php=$default_version
+          fi
+        fi 
+
+        # Extract username based on the path
+        if [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/html/* ]]; then
+          BS_USER_SERVER_SITES="www-data"
+          BS_PATH_USER_HOME="html"
+        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/bitrix/* ]]; then
+          BS_USER_SERVER_SITES="bitrix"
+          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
+        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/user*/* ]]; then
+          BS_USER_SERVER_SITES=$(echo "${path_site_from_links}" | cut -d'/' -f4)
+          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
+        else
+          BS_USER_SERVER_SITES=""
+        fi
+
+        BS_GROUP_USER_SERVER_SITES="${BS_USER_SERVER_SITES}"
+        BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
       ;;
       full )
           # Choose php version for site
@@ -202,6 +248,36 @@ add_site(){
             new_version_php="${new_version_php^^}"
             new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
             echo -e "\n   Selected PHP version: $new_version_php\n"
+
+            # Create unique username for each full site
+              BS_USER_SERVER_SITES=$(generate_unique_username)
+              BS_GROUP_USER_SERVER_SITES=$BS_USER_SERVER_SITES
+
+              while true; do
+                  read_by_def "   Enter username for the site user (default: $BS_USER_SERVER_SITES): " BS_USER_SERVER_SITES $BS_USER_SERVER_SITES
+                  if id "$BS_USER_SERVER_SITES" &>/dev/null; then
+                      echo "   Warning: User $BS_USER_SERVER_SITES already exists."
+                      read -r -p "   Do you want to continue with this existing user? (Y/N): " use_existing
+                      case $use_existing in
+                          [Yy]* ) break;;
+                          [Nn]* ) continue;;
+                          * ) echo "   Please answer Y or N.";;
+                      esac
+                  else
+                      break
+                  fi
+              done
+
+              BS_GROUP_USER_SERVER_SITES="${BS_USER_SERVER_SITES}"
+              BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
+              BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
+
+
+              # Create the user if it doesn't exist
+              if ! id "$BS_USER_SERVER_SITES" &>/dev/null; then
+                  useradd -m -d "${BS_PATH_USER_HOME_PREFIX}/${BS_USER_SERVER_SITES}" -s /bin/bash "${BS_USER_SERVER_SITES}"
+              fi
+              echo "   Username: ${BS_USER_SERVER_SITES}"
 
           while true; do
             db_name=$(sanitize_name "db_$domain" "$BS_MAX_CHAR_DB_NAME")
@@ -277,6 +353,8 @@ add_site(){
         echo "   Path to links site: $path_site_from_links";
       ;;
       full )
+        echo "   Site user: $BS_USER_SERVER_SITES"
+        echo "   Selected PHP version: $new_version_php"
         echo "   Database name: $db_name";
         echo "   Database user: $db_user";
         echo "   Database password: $db_password";

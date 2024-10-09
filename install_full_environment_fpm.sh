@@ -151,6 +151,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   php_version=${BX_PHP_DEFAULT_VERSION} \
   server_timezone=${BS_SERVER_TIMEZONE}"
 
+# SMTP
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SETTINGS_SMTP_SITES}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
   -e "is_new_install_env=Y \
   account_name='' \
@@ -162,6 +163,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   smtp_file_group_user_log=${BS_SMTP_FILE_GROUP_USER_LOG} \
   smtp_path_wrapp_script_sh=${BS_SMTP_PATH_WRAPP_SCRIPT_SH}"
 
+# Full enviroment
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_INSTALL_NEW_FULL_ENVIRONMENT}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
   -e "domain=default \
 
@@ -206,6 +208,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   push_server_config=${BS_PUSH_SERVER_CONFIG} \
   
   php_version=${BX_PHP_DEFAULT_VERSION} \
+  php_current_default_version=${BX_PHP_DEFAULT_VERSION} \
   server_timezone=${BS_SERVER_TIMEZONE}"
 
 # disable httpd access logs

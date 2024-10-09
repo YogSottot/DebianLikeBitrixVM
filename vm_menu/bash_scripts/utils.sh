@@ -51,10 +51,10 @@ list_sites(){
       fi
 
       # Add PHP version information
-      local site_config="/etc/apache2/sites-enabled/${tmp_dir}.conf"
+      local site_config="${BS_PATH_APACHE_SITES_ENABLED}/${tmp_dir}.conf"
 
       if [ -f "$site_config" ]; then
-        php_version=$(grep -oP 'php\K[\d.]+(?=-fpm\.sock)' "$site_config")
+        php_version=$(grep -oP 'php\K[\d.]+(?=-(?:user\d+)?-?fpm\.sock)' "$site_config")
 
         if [ -z "$php_version" ]; then
           php_version=$default_version

@@ -25,12 +25,14 @@ php_enable_webserver: true
 # PHP-FPM configuration.
 php_enable_php_fpm: true
 php_fpm_state: started
-php_fpm_handler_state: restarted
+php_fpm_handler_state: reloaded
 php_fpm_enabled_on_boot: true
 php_fpm_pool_user: "{{ user_server_sites }}"
 php_fpm_pool_group: "{{ group_user_server_sites }}"
 php_fpm_listen: "/run/php/php{{ php_default_version_debian }}-fpm.sock"
 php_fpm_listen_allowed_clients: "127.0.0.1"
+php_fpm_listen_owner: www-data
+php_fpm_listen_group: www-data
 php_fpm_pm_max_children: "{{ (ansible_memtotal_mb // 2) // 32 | int | abs }}"
 php_fpm_pm_start_servers: 1
 php_fpm_pm_min_spare_servers: 1
@@ -44,6 +46,7 @@ php_fpm_php_admin_flag_log_errors: "on"
 # PHP-FPM pool configuration.
 php_fpm_pools:
   - pool_name: "{{ php_version }}"
+    pool_config_filename: "www.conf"
     pool_ansible.builtin.template: www.conf.j2
     pool_listen: "{{ php_fpm_listen }}"
     pool_listen_allowed_clients: "{{ php_fpm_listen_allowed_clients }}"
@@ -88,7 +91,7 @@ php_apc_enable_cli: "0"
 php_use_managed_bitrixenv_ini: true
 
 php_expose_php: "Off"
-php_memory_limit: "256M"
+php_memory_limit: "512M"
 php_max_execution_time: "300"
 php_max_input_time: "300"
 php_max_input_vars: "100000"
@@ -124,14 +127,15 @@ php_session_gc_probability: 1
 php_session_gc_divisor: 1000
 php_session_gc_maxlifetime: 604800
 php_session_save_handler: files
-php_session_save_path: "/var/lib/php/sessions/"
+# php_session_save_path: "/var/lib/php/sessions/"
+php_session_save_path: "/tmp/php_sessions/{{ domain }}"
 php_session_name: "PHPSESSID"
 
 php_error_reporting: "E_ALL & ~E_NOTICE & ~E_DEPRECATED"
 php_display_errors: "Off"
 php_display_startup_errors: "Off"
 
-php_upload_tmp_dir: "/tmp/"
+php_upload_tmp_dir: "/tmp/php_upload/{{ domain }}"
 
 # Install PHP from source (instead of using a package manager) with these vars.
 php_install_from_source: false

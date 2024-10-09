@@ -36,6 +36,16 @@
   with_items: "{{ mysql_config_include_files }}"
   notify: restart mysql
 
+- name: Add [mysqld] in z_bx_custom.cnf file
+  ansible.builtin.lineinfile:
+    path: "{{ mysql_config_include_dir }}/z_bx_custom.cnf"
+    line: "[mysqld]"
+    create: true
+    state: present
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Verify mysql log directory exists.
   ansible.builtin.file:
     path: "{{ mysql_log_dir }}"

@@ -74,7 +74,10 @@ alias chgrp='chgrp --preserve-root'
 
 # TODO: change exa to eza when Debian 13 released
 alias l='exa -lahgF --time-style long-iso --icons'
+# sort by date
 alias lst='exa -lahgF --time-style long-iso -s date --icons'
+# sort by size
+alias lst='exa -lahgFr --time-style long-iso -s size --icons'
 # show directory tree, use lt 2 or more to show more levels
 alias lt='exa -lahFT --time-style long-iso --icons -L '
 # lsd color

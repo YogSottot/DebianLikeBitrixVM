@@ -185,7 +185,8 @@ function action_change_php_version(){
   php_set_manual=$((php_set_manual == 1)) \
   user_server_sites=${BS_USER_SERVER_SITES} \
   group_user_server_sites=${BS_GROUP_USER_SERVER_SITES} \
-  server_timezone=${BS_SERVER_TIMEZONE}"
+  server_timezone=${BS_SERVER_TIMEZONE} \
+  domain=default"
 
   press_any_key_to_return_menu;
 }
