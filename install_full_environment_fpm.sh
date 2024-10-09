@@ -41,7 +41,7 @@ FULL_PATH_MENU_FILE="$DEST_DIR_MENU/$DIR_NAME_MENU/menu.sh"
 
 apt update -y
 apt upgrade -y
-apt install -y ansible git
+apt install -y ansible git locales-all
 # fix for mysql role
 ansible-galaxy collection install 'community.mysql:==3.10.3'
 
