@@ -46,7 +46,7 @@ alias cp='cp -i'
 alias mv='mv -i'
 
 # netstat
-alias ports='ss -tnlp | column -t'
+alias ports='ss --numeric --listening --processes --tcp | column -t'
 
 # https://vikaskyadav.github.io/awesome-bash-alias/
 # cd
@@ -73,13 +73,13 @@ alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
 # TODO: change exa to eza when Debian 13 released
-alias l='exa -lahgF --time-style long-iso --icons'
+alias l='exa --long --all --group --header --classify --time-style long-iso --icons'
 # sort by date
-alias lst='exa -lahgF --time-style long-iso -s date --icons'
+alias lst='exa --long --all --group --header --classify  --time-style long-iso -s date --icons'
 # sort by size
-alias lst='exa -lahgFr --time-style long-iso -s size --icons'
+alias lst='exa --long --all --group --header --classify  --reverse --time-style long-iso -s size --icons'
 # show directory tree, use lt 2 or more to show more levels
-alias lt='exa -lahFT --time-style long-iso --icons -L '
+alias lt='exa --long --all --header --classify  --tree --time-style long-iso --icons --level '
 # lsd color
 alias lsd='lsd --color=never'
 
