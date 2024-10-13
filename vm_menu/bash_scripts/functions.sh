@@ -179,7 +179,7 @@ add_site(){
 
     ssl_lets_encrypt="N";
     ssl_lets_encrypt_www="Y";
-    ssl_lets_encrypt_email='';
+    ssl_lets_encrypt_email="${BS_EMAIL_ADMIN_FOR_NOTIFY}";
     redirect_to_https="N";
 
     echo -e "\n   Menu -> Add a site:\n";
@@ -193,7 +193,9 @@ add_site(){
       fi
     done
 
-    ssl_lets_encrypt_email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
+    if [ -z "$ssl_lets_encrypt_email" ]; then
+      ssl_lets_encrypt_email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
+    fi
 
     while true; do
         read -r -p "   Enter site mode link or full: " mode
@@ -393,7 +395,7 @@ get_lets_encrypt_certificate(){
   list_sites;
 
     domain=''
-    email='';
+    email="${BS_EMAIL_ADMIN_FOR_NOTIFY}";
 
     path_site="${BS_PATH_SITES}/${BS_DEFAULT_SITE_NAME}"
     redirect_to_https="N";
@@ -401,13 +403,14 @@ get_lets_encrypt_certificate(){
 
     echo -e "\n   Menu -> Configure Let\`s Encrypt certificate:\n";
     while [[ -z "$domain" ]]; do
-       read_by_def "   Enter site domain (example: example.com): " domain $domain;
-       if [ -z "$domain" ]; then
-        echo "   Incorrect site domain! Please enter another site domain";
-       fi
+          read_by_def "   Enter site domain (example: example.com): " domain $domain;
+        if [ -z "$domain" ]; then
+          echo "   Incorrect site domain! Please enter another site domain";
+        fi
     done
-
-    email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
+    if [ -z "$email" ]; then
+      email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
+    fi
 
     read_by_def "   Enter full path to site (default: $path_site): " path_site $path_site;
     read_by_def "   Enter Y or N to get a certificate for WWW (default: $is_www): " is_www $is_www;
