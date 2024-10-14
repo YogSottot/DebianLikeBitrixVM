@@ -31,6 +31,7 @@
           - poppler-utils
           - postfix
           - psmisc
+          - pwgen
           - rsync
           - rsyslog
           - s-nail

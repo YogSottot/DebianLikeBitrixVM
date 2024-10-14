@@ -40,11 +40,11 @@ main_menu(){
     fi
     echo -e "${msg_new_version_menu}";
     echo "          1) List of sites dirs";
-    echo "          2) Add site";
+    echo "          2) Add/Change site";
     echo "          3) Configure Let\`s Encrypt certificate";
     echo "          4) Enable or Disable redirect HTTP to HTTPS";
     echo "          5) ${mesg_menu_emulate_bitrix_vm}";
-    echo "          6) Add/Change PHP version";
+    echo "          6) Add/Change global PHP version";
     echo "          7) Settings SMTP sites";
     echo "          8) Installing Extensions";
     echo "          9) Update server";
@@ -62,7 +62,7 @@ main_menu(){
     case $comand in
 
       "1") show_sites_dirs ;;
-      "2") add_site ;;
+      "2") menu_edit_sites ;;
       "3") get_lets_encrypt_certificate ;;
       "4") enable_or_disable_redirect_http_to_https ;;
       "5") action_emulate_bitrix_vm ;;
@@ -97,13 +97,44 @@ menu_install_extensions(){
     echo "          0) Return to main menu";
     echo -e "\n\n";
     echo -n "Enter command: "
-    read comand
+    read -r comand
 
     case $comand in
 
-     "1") install_sphinx ;;
-     "2") install_file_conversion_server ;;
-     "3") install_netdata ;;
+    "1") install_sphinx ;;
+    "2") install_file_conversion_server ;;
+    "3") install_netdata ;;
+
+    0|z)  main_menu
+    ;;
+     *)
+      echo "Error unknown command"
+      ;;
+
+    esac
+    done
+}
+
+menu_edit_sites(){
+    comand=;
+    until [[ "$comand" == "0" ]]; do
+    clear;
+    list_sites;
+
+    echo -e "\n          Menu -> Edit site settings:\n";
+    echo "          1) Add site";
+    echo "          2) Change the php version of an existing website";
+    echo "          3) Delete site";
+    echo "          0) Return to main menu";
+    echo -e "\n\n";
+    echo -n "Enter command: "
+    read -r comand
+
+    case $comand in
+
+      "1") add_site ;;
+      "2") edit_site_config ;;
+      "3") delete_site ;;
 
     0|z)  main_menu
     ;;
@@ -165,6 +196,25 @@ generate_unique_username() {
     done
 }
 
+# Extract username based on the path
+extract_username_from_path() {
+        if [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/html/* ]]; then
+          BS_USER_SERVER_SITES="www-data"
+          BS_PATH_USER_HOME="html"
+        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/bitrix/* ]]; then
+          BS_USER_SERVER_SITES="bitrix"
+          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
+        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/user*/* ]]; then
+          BS_USER_SERVER_SITES=$(echo "${path_site_from_links}" | cut -d'/' -f4)
+          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
+        else
+          BS_USER_SERVER_SITES=""
+        fi
+
+        BS_GROUP_USER_SERVER_SITES="${BS_USER_SERVER_SITES}"
+        BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
+}
+
 add_site(){
     clear;
     list_sites;
@@ -187,7 +237,7 @@ add_site(){
       read_by_def "   Enter site domain (example: example.com): " domain $domain;
       if [ -z "$domain" ]; then
         echo "   Incorrect site domain! Please enter site domain";
-      elif [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $domain " ]]; then
+      elif [[ " ${ARR_ALL_USERS_DIR_SITES[*]} " =~ " $domain " ]]; then
         domain='';
         echo "   Domain already exists! Please enter another site domain";
       fi
@@ -224,22 +274,8 @@ add_site(){
           fi
         fi 
 
-        # Extract username based on the path
-        if [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/html/* ]]; then
-          BS_USER_SERVER_SITES="www-data"
-          BS_PATH_USER_HOME="html"
-        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/bitrix/* ]]; then
-          BS_USER_SERVER_SITES="bitrix"
-          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
-        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/user*/* ]]; then
-          BS_USER_SERVER_SITES=$(echo "${path_site_from_links}" | cut -d'/' -f4)
-          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
-        else
-          BS_USER_SERVER_SITES=""
-        fi
+        extract_username_from_path
 
-        BS_GROUP_USER_SERVER_SITES="${BS_USER_SERVER_SITES}"
-        BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
       ;;
       full )
           # Choose php version for site
@@ -383,6 +419,90 @@ add_site(){
     done
 }
 
+
+edit_site_config(){
+    clear;
+    list_sites;
+
+    domain=''
+    mode=''
+    path_site_from_links=''
+    new_version_php="$default_version";
+
+    ssl_lets_encrypt="N";
+    ssl_lets_encrypt_www="Y";
+    ssl_lets_encrypt_email="${BS_EMAIL_ADMIN_FOR_NOTIFY}";
+    redirect_to_https="N";
+
+    echo -e "\n   Menu -> Edit site:\n";
+    while [[ ! -d "$path_site_from_links" ]]; do
+      read_by_def "   Enter existing path to site (example: ${BS_PATH_DEFAULT_SITE}): " path_site_from_links "${BS_PATH_DEFAULT_SITE}";
+      if [ ! -d "$path_site_from_links" ]; then
+        echo "   Incorrect site dir! Please enter site dir";
+      fi
+    done
+
+    if [ -z "$ssl_lets_encrypt_email" ]; then
+      ssl_lets_encrypt_email=$(echo "admin@$domain" | "${dir_helpers}/perl/translate.pl")
+    fi
+
+        # Extract domain name from link
+        domain=$(basename "$path_site_from_links")
+
+        # Extract username based on the path
+        extract_username_from_path
+
+        # Choose php version for site
+        read_by_def "   Enter PHP version for site from installed (default: $default_version): " new_version_php "$new_version_php";
+        if [ -z "$new_version_php" ]; then
+        echo "   Incorrect PHP version! Please enter PHP version";
+        fi
+          new_version_php="${new_version_php^^}"
+          new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
+          echo -e "\n   Selected PHP version: $new_version_php\n"
+
+        BS_GROUP_USER_SERVER_SITES="${BS_USER_SERVER_SITES}"
+        BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
+        BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
+
+
+    read_by_def "   Enter Y or N for setting SSL Let\`s Encrypt site (default: $ssl_lets_encrypt): " ssl_lets_encrypt $ssl_lets_encrypt;
+    ssl_lets_encrypt="${ssl_lets_encrypt^^}"
+
+    if [ $ssl_lets_encrypt == "Y" ]; then
+        read_by_def "   Enter Y or N to get a certificate for WWW (default: $ssl_lets_encrypt_www): " ssl_lets_encrypt_www $ssl_lets_encrypt_www;
+        read_by_def "   Enter email for SSL Let\`s Encrypt (default: $ssl_lets_encrypt_email): " ssl_lets_encrypt_email $ssl_lets_encrypt_email;
+        read_by_def "   Enter Y or N for redirect HTTP to HTTPS (default: $redirect_to_https): " redirect_to_https $redirect_to_https;
+        redirect_to_https="${redirect_to_https^^}"
+        ssl_lets_encrypt_www="${ssl_lets_encrypt_www^^}"
+    fi
+
+
+    echo -e "\n   Entered data:\n"
+    echo "   Domain: $domain";
+    echo "   Path to site: $path_site_from_links";
+    echo "   Site user: $BS_USER_SERVER_SITES"
+    echo "   Selected PHP version: $new_version_php"
+    echo "   SSL Let\`s Encrypt: $ssl_lets_encrypt";
+
+    if [ $ssl_lets_encrypt == "Y" ]; then
+        echo "   Get a certificate for WWW: $ssl_lets_encrypt_www"
+        echo "   SSL Let\`s Encrypt email: $ssl_lets_encrypt_email"
+        echo "   Redirect HTTP to HTTPS: $redirect_to_https"
+    fi
+
+    echo -e "\n\n"
+
+    while true; do
+        read -r -p "   Do you really want to edit a website? (Y/N): " answer
+        case $answer in
+            [Yy]* ) action_edit_site; break;;
+            [Nn]* ) break;;
+            * ) echo "   Please enter Y or N.";;
+        esac
+    done
+}
+
 show_sites_dirs(){
   clear;
   list_sites;
@@ -443,30 +563,34 @@ enable_or_disable_redirect_http_to_https(){
   list_sites;
 
   site=$BS_DEFAULT_SITE_NAME;
+  path_site_from_links=$BS_PATH_DEFAULT_SITE
 
   echo -e "\n   Enable or Disable redirecting HTTP to HTTPS:\n";
 
-  read_by_def "   Enter site dir (default: $site): " site $site;
+  read_by_def "  Enter path to site (default: $path_site_from_links): " path_site_from_links $path_site_from_links;
 
-  while [[ -z "$site" ]] || ! [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $site " ]]; do
+        # Extract domain name from link
+        site=$(basename "$path_site_from_links")
 
-       if [ -z "$site" ]; then
+  while [[ -z "$site" ]] || ! [[ " ${ARR_ALL_USERS_DIR_SITES[*]} " =~ " $site " ]]; do
+
+      if [ -z "$site" ]; then
         echo "   Incorrect site dir! Please enter site dir";
-        read_by_def "   Enter site dir: " site $site;
-       elif ! [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $site " ]]; then
+        read_by_def "   Enter site dir: " site "${site}";
+      elif ! [[ " ${ARR_ALL_USERS_DIR_SITES[*]} " =~ " $site " ]]; then
         site='';
         echo "   Domain does not exist! You can use exists domain";
-        read_by_def "   Enter site dir: " site $site;
-       fi
+        read_by_def "   Enter site dir: " site "${site}";
+      fi
   done
 
   current_state='disabled';
   action='enable';
 
   local index=0
-  while [[ -n "${ARR_ALL_DIR_SITES_DATA["${index}_dir"]}" ]]; do
-    if [[ "${ARR_ALL_DIR_SITES_DATA["${index}_dir"]}" == "$site" ]]; then
-      if [[ "${ARR_ALL_DIR_SITES_DATA[$index,is_https]}" == "Y" ]]; then
+  while [[ -n "${ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]}" ]]; do
+    if [[ "${ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]}" == "$site" ]]; then
+      if [[ "${ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]}" == "Y" ]]; then
         current_state='enabled';
         action='disable';
       fi
@@ -475,9 +599,11 @@ enable_or_disable_redirect_http_to_https(){
     ((index++))
   done
 
-   echo "   Your site $site redirecting HTTP to HTTPS status: $current_state";
+    echo "   Your site $site redirecting HTTP to HTTPS status: $current_state";
 
-   path_site="$BS_PATH_SITES/$site"
+    extract_username_from_path
+
+    path_site="$BS_PATH_SITES/$site"
 
   while true; do
     read -r -p "   Do you really want to $action redirect HTTP to HTTPS? (Y/N): " answer
@@ -578,15 +704,15 @@ function settings_smtp_sites() {
 
     read_by_def "   Enter site dir (default: $site): " site $site;
 
-    while [[ -z "$site" ]] || ! [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $site " ]]; do
-       if [ -z "$site" ]; then
+    while [[ -z "$site" ]] || ! [[ " ${ARR_ALL_USERS_DIR_SITES[*]} " =~ " $site " ]]; do
+      if [ -z "$site" ]; then
         echo "   Incorrect site dir! Please enter site dir";
         read_by_def "   Enter site dir: " site $site;
-       elif ! [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $site " ]]; then
+      elif ! [[ " ${ARR_ALL_USERS_DIR_SITES[*]} " =~ " $site " ]]; then
         site='';
         echo "   Site dir does not exist! You can use exists site dir";
         read_by_def "   Enter site dir: " site $site;
-       fi
+      fi
     done
 
     if [[ $site == "$BS_DEFAULT_SITE_NAME" ]]; then
@@ -742,10 +868,10 @@ function install_file_conversion_server() {
     echo -e "\n";
 
     while [[ -z "$domain" ]]; do
-       read_by_def "   Enter site domain (example: example.com): " domain $domain;
-       if [ -z "$domain" ]; then
+      read_by_def "   Enter site domain (example: example.com): " domain $domain;
+      if [ -z "$domain" ]; then
         echo "   Incorrect site domain! Please enter another site domain";
-       fi
+      fi
     done
 
     read_by_def "   Enter full path to site (default: $full_path_site): " full_path_site $full_path_site;
@@ -776,12 +902,25 @@ function delete_site() {
     site=''
     db_name=''
     db_user=''
+    path_site_from_links='';
 
-    read_by_def "   Enter site dir: " site $site;
-    while [[ -z "$site" ]] || ! [[ " ${ARR_ALL_DIR_SITES[*]} " =~ " $site " ]]; do
-            echo "   Incorrect site dir! Please enter site dir";
-            read_by_def "   Enter site dir: " site $site;
+    read_by_def "  Enter path to site (example: /var/www/html/bx-site): " path_site_from_links "${path_site_from_links}";
+    while [[ -z "$path_site_from_links" ]]|| ! [[ " ${ARR_ALL_USERS_DIR_SITES_DATA[*]} " =~ " $path_site_from_links " ]]; do
+            echo "   Incorrect path to dir! Please enter path to site dir";
+            read_by_def "   Enter path to dir: " path_site_from_links $path_site_from_links;
     done
+
+
+    # Extract domain name from link
+    site=$(basename "$path_site_from_links")
+
+
+    #read_by_def "   Enter site dir: " site $site;
+    #while [[ -z "$site" ]] || ! [[ " ${ARR_ALL_USERS_DIR_SITES[*]} " =~ " $site " ]]; do
+    #        echo "   Incorrect site dir! Please enter site dir";
+    #        read_by_def "   Enter site dir: " site $site;
+    #done
+    extract_username_from_path
 
     full_path_site="${BS_PATH_SITES}/${site}"
     bx_path_site="${full_path_site}/bitrix"
@@ -817,8 +956,8 @@ function delete_site() {
     while true; do
       local code_rand=$((100000 + RANDOM % 899999))
       read -r -p "  If you really want to$(echo -e "${action_color}"), enter the code: ${code_rand} or enter 0 to exit " answer
-      case $answer in
-        $code_rand ) break;;
+      case "${answer}" in
+        "${code_rand}" ) break;;
         0 ) return 0 ;;
       esac
     done

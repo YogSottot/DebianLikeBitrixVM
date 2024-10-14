@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034
 
 # General configs
-BS_VERSION_MENU="1.2.0"
+BS_VERSION_MENU="1.2.1"
 BS_PATH_USER_HOME_PREFIX="/var/www"
 BS_PATH_USER_HOME="html"
 BS_PATH_SITES="$BS_PATH_USER_HOME_PREFIX/$BS_PATH_USER_HOME"
@@ -12,7 +12,7 @@ BS_USER_SERVER_SITES="www-data"
 BS_GROUP_USER_SERVER_SITES="www-data"
 BS_PERMISSIONS_SITES_DIRS="0775"
 BS_PERMISSIONS_SITES_FILES="0664"
-BS_EXCLUDED_DIRS_SITES=(".bx_temp" "temp" "tmp" "test" ".ssh")
+BS_EXCLUDED_DIRS_SITES=(".bx_temp" "temp" "tmp" "test" ".ssh" "bitrixenv_error")
 BS_SITE_LINKS_RESOURCES=("local" "bitrix" "upload" "images")
 BS_SERVER_TIMEZONE="Europe/Moscow"
 BS_DOWNLOAD_BITRIX_INSTALL_FILES_NEW_SITE=(
@@ -80,6 +80,7 @@ BS_ANSIBLE_PB_INITIAL_SETUP="initial_setup.yaml"
 BS_ANSIBLE_PB_SETUP_REPOS="setup_repos.yaml"
 BS_ANSIBLE_PB_SETUP_BASHRC="setup_bashrc.yaml"
 BS_ANSIBLE_PB_SETUP_POSTFIX="setup_postfix.yaml"
+BS_ANSIBLE_PB_EDIT_SITE="edit_site.yaml"
 
 # Data Base
 BS_MAX_CHAR_DB_NAME=20

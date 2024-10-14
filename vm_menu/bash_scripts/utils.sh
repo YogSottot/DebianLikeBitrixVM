@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -A ARR_ALL_DIR_SITES_DATA
+declare -A ARR_ALL_USERS_DIR_SITES_DATA
 
 generate_password() {
     local length=$1
@@ -17,58 +17,111 @@ generate_password() {
 }
 
 list_sites(){
-  ARR_ALL_DIR_SITES_DATA=()
-  ARR_ALL_DIR_SITES=()
-  echo -e "   List of sites dirs: \n";
-
-  get_current_version_php
+  ARR_ALL_USERS_DIR_SITES_DATA=()
+  ARR_ALL_USERS_DIR_SITES=()
+  printf "   List of sites dirs: \n"
 
   # Функция для заполнения массива данными
   fill_array() {
+    local user_home_dirs
     local index=0
-    for tmp_dir in $(find "$BS_PATH_SITES" -maxdepth 1 -type d | grep -v "^$BS_PATH_SITES$" | sed 's|.*/||'); do
 
-      if [[ $tmp_dir =~ ^\. ]]; then
-        continue
-      fi
+    # Get the list of user home directories inside BS_PATH_USER_HOME_PREFIX
+    if ! user_home_dirs=$(find "$BS_PATH_USER_HOME_PREFIX" -mindepth 1 -maxdepth 1 -type d | grep -vFf <(printf "%s\n" "${BS_EXCLUDED_DIRS_SITES[@]}")); then
+      printf "Error: Unable to list user home directories\n" >&2
+      return 1
+    fi
 
-      if [[ " ${BS_EXCLUDED_DIRS_SITES[@]} " =~ " $tmp_dir " ]]; then
-        continue
-      fi
+    # Loop through each user's home directory
+    for user_home in $user_home_dirs; do
+      local username; username=$(basename "$user_home")
+      
+      # Check if the user is www-data (html)
+      if [[ "$username" == "$BS_USER_SERVER_SITES" || "$username" == "html" ]]; then
+        local user_sites_dir="$BS_PATH_SITES"
+        
+        # Add the default site for www-data
+        if [[ -d "$BS_PATH_DEFAULT_SITE" ]]; then
+          ARR_ALL_USERS_DIR_SITES+=("$BS_DEFAULT_SITE_NAME")
+          ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]="$BS_DEFAULT_SITE_NAME"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,is_default]="Y"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]="N"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,doc_root]="$BS_PATH_DEFAULT_SITE"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,user]="$BS_USER_SERVER_SITES"
 
-      ARR_ALL_DIR_SITES+=("$tmp_dir")
-      ARR_ALL_DIR_SITES_DATA["${index}_dir"]="$tmp_dir"
-      ARR_ALL_DIR_SITES_DATA[$index,is_default]="N"
-      ARR_ALL_DIR_SITES_DATA[$index,is_https]="N"
-      ARR_ALL_DIR_SITES_DATA[$index,doc_root]="$BS_PATH_SITES/$tmp_dir"
+          # Check for HTTPS
+          if [[ -f "$BS_PATH_DEFAULT_SITE/.htsecure" ]]; then
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]="Y"
+          fi
 
-      if [[ "$tmp_dir" == "$BS_DEFAULT_SITE_NAME" ]]; then
-        ARR_ALL_DIR_SITES_DATA[$index,is_default]="Y"
-      fi
+          # Add PHP version information from Apache config
+          local site_config="${BS_PATH_APACHE_SITES_ENABLED}/${BS_DEFAULT_SITE_NAME}.conf"
+          if [[ -f "$site_config" ]]; then
+            local php_version; php_version=$(grep -oP 'php\K[\d.]+(?=-(?:user\d+)?-?fpm\.sock)' "$site_config")
 
-      if [[ -f "$BS_PATH_SITES/$tmp_dir/.htsecure" ]]; then
-        ARR_ALL_DIR_SITES_DATA[$index,is_https]="Y"
-      fi
+            if [[ -z "$php_version" ]]; then
+              php_version=$default_version
+              ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]="Y"
+            else
+              ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]=$([[ "$php_version" == "$default_version" ]] && echo "Y" || echo "N")
+            fi
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]="$php_version"
+          else
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]="N/A"
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]="N/A"
+          fi
 
-      # Add PHP version information
-      local site_config="${BS_PATH_APACHE_SITES_ENABLED}/${tmp_dir}.conf"
-
-      if [ -f "$site_config" ]; then
-        php_version=$(grep -oP 'php\K[\d.]+(?=-(?:user\d+)?-?fpm\.sock)' "$site_config")
-
-        if [ -z "$php_version" ]; then
-          php_version=$default_version
-          ARR_ALL_DIR_SITES_DATA[$index,php_default]="Y"
-        else
-          ARR_ALL_DIR_SITES_DATA[$index,php_default]=$([ "$php_version" == "$default_version" ] && echo "Y" || echo "N")
+          ((index++))
         fi
-        ARR_ALL_DIR_SITES_DATA[$index,php_version]="$php_version"
+
       else
-        ARR_ALL_DIR_SITES_DATA[$index,php_version]="N/A"
-        ARR_ALL_DIR_SITES_DATA[$index,php_default]="N/A"
+        local user_sites_dir="$user_home"
       fi
 
-      ((index++))
+      # Process additional sites for both www-data and other users
+      if [[ -d "$user_sites_dir" ]]; then
+        for tmp_dir in $(find "$user_sites_dir" -maxdepth 1 -type d | grep -v "^$user_sites_dir$" | sed 's|.*/||'); do
+
+          # Skip hidden directories or excluded directories
+          if [[ $tmp_dir =~ ^\. ]] || [[ " ${BS_EXCLUDED_DIRS_SITES[@]} " =~ " $tmp_dir " ]]; then
+            #printf "Skipping directory: %s for user: %s\n" "$tmp_dir" "$username" >&2
+            continue
+          fi
+
+          #printf "Processing user: %s, site: %s\n" "$username" "$tmp_dir" >&2
+
+          ARR_ALL_USERS_DIR_SITES+=("$tmp_dir")
+          ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]="$tmp_dir"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,is_default]="N"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]="N"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,doc_root]="$user_sites_dir/$tmp_dir"
+          ARR_ALL_USERS_DIR_SITES_DATA[$index,user]="$username"
+
+          # Check for HTTPS
+          if [[ -f "$user_sites_dir/$tmp_dir/.htsecure" ]]; then
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]="Y"
+          fi
+
+          # Add PHP version information from Apache config
+          local site_config="${BS_PATH_APACHE_SITES_ENABLED}/${tmp_dir}.conf"
+          if [[ -f "$site_config" ]]; then
+            local php_version; php_version=$(grep -oP 'php\K[\d.]+(?=-(?:user\d+)?-?fpm\.sock)' "$site_config")
+
+            if [[ -z "$php_version" ]]; then
+              php_version=$default_version
+              ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]="Y"
+            else
+              ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]=$([[ "$php_version" == "$default_version" ]] && echo "Y" || echo "N")
+            fi
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]="$php_version"
+          else
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]="N/A"
+            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]="N/A"
+          fi
+
+          ((index++))
+        done
+      fi
     done
   }
 
@@ -91,27 +144,51 @@ list_sites(){
     printf "+"
   }
 
-  # Функция для вывода таблицы
-  print_table() {
+  # Функция для вывода таблицы для определённого пользователя
+  print_user_table() {
+    local username="$1"
+
+    printf "\n   Sites for user: %s\n" "$username"
     print_line
-    printf "   | %-40s | %-12s | %-50s | %-10s | %-16s |\n" "Directory site" "Redirect HTTPS" "Document root" "PHP Version" "Default PHP"
+    printf "   | %-40s | %-14s | %-50s | %-11s | %-16s |\n" "Directory site" "Redirect HTTPS" "Document root" "PHP Version" "Default PHP"
     print_line
 
     local index=0
-    while [[ -n "${ARR_ALL_DIR_SITES_DATA["${index}_dir"]}" ]]; do
-      printf "   | %-40s | %-14s | %-50s | %-11s | %-16s |\n" \
-        "${ARR_ALL_DIR_SITES_DATA["${index}_dir"]}" \
-        "${ARR_ALL_DIR_SITES_DATA[$index,is_https]}" \
-        "${ARR_ALL_DIR_SITES_DATA[$index,doc_root]}" \
-        "${ARR_ALL_DIR_SITES_DATA[$index,php_version]}" \
-        "${ARR_ALL_DIR_SITES_DATA[$index,php_default]}"
-      print_line
+    while [[ -n "${ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]}" ]]; do
+      if [[ "${ARR_ALL_USERS_DIR_SITES_DATA[$index,user]}" == "$username" ]]; then
+        printf "   | %-40s | %-14s | %-50s | %-11s | %-16s |\n" \
+          "${ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]}" \
+          "${ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]}" \
+          "${ARR_ALL_USERS_DIR_SITES_DATA[$index,doc_root]}" \
+          "${ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]}" \
+          "${ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]}"
+        print_line
+      fi
       ((index++))
     done
   }
 
+  # Функция для вывода таблицы для всех пользователей
+  print_tables() {
+      # Define an error handling function
+      handle_error() {
+          echo "Error: $1" >&2
+          exit 1
+      }
+
+      # Получаем список директорий пользователей
+      if ! readarray -t user_directories < <(find "$BS_PATH_USER_HOME_PREFIX" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort | grep -vFf <(printf "%s\n" "${BS_EXCLUDED_DIRS_SITES[@]}")); then
+          handle_error "Failed to read user directories"
+      fi
+
+      # Now you can use ${user_directories[@]} in your script
+      for user in "${user_directories[@]}"; do
+          print_user_table "$user"
+      done
+  }
+
   fill_array
-  print_table
+  print_tables
   get_current_version_php
 }
 
