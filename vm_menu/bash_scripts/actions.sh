@@ -7,7 +7,7 @@ action_create_site(){
 
   pb_redirect_http_to_https=$(realpath "$dir/${BS_PATH_ANSIBLE_PLAYBOOKS}/${BS_ANSIBLE_PB_ENABLE_OR_DISABLE_REDIRECT_HTTP_TO_HTTPS}")
 
-  ansible-playbook "${pb}" $BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS \
+  ansible-playbook "${pb}" "${BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS}" \
   -e "domain=${domain} \
 
   mode=${mode} \
