@@ -19,6 +19,8 @@ generate_password() {
 list_sites(){
   ARR_ALL_USERS_DIR_SITES_DATA=()
   ARR_ALL_USERS_DIR_SITES=()
+  get_current_version_php
+
   printf "   List of sites dirs: \n"
 
   # Функция для заполнения массива данными
@@ -28,55 +30,14 @@ list_sites(){
 
     # Get the list of user home directories inside BS_PATH_USER_HOME_PREFIX
     if ! user_home_dirs=$(find "$BS_PATH_USER_HOME_PREFIX" -mindepth 1 -maxdepth 1 -type d | grep -vFf <(printf "%s\n" "${BS_EXCLUDED_DIRS_SITES[@]}")); then
-      printf "Error: Unable to list user home directories\n" >&2
+      #printf "Error: Unable to list user home directories\n" >&2
       return 1
     fi
 
     # Loop through each user's home directory
     for user_home in $user_home_dirs; do
       local username; username=$(basename "$user_home")
-      
-      # Check if the user is www-data (html)
-      if [[ "$username" == "$BS_USER_SERVER_SITES" || "$username" == "html" ]]; then
-        local user_sites_dir="$BS_PATH_SITES"
-        
-        # Add the default site for www-data
-        if [[ -d "$BS_PATH_DEFAULT_SITE" ]]; then
-          ARR_ALL_USERS_DIR_SITES+=("$BS_DEFAULT_SITE_NAME")
-          ARR_ALL_USERS_DIR_SITES_DATA["${index}_dir"]="$BS_DEFAULT_SITE_NAME"
-          ARR_ALL_USERS_DIR_SITES_DATA[$index,is_default]="Y"
-          ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]="N"
-          ARR_ALL_USERS_DIR_SITES_DATA[$index,doc_root]="$BS_PATH_DEFAULT_SITE"
-          ARR_ALL_USERS_DIR_SITES_DATA[$index,user]="$BS_USER_SERVER_SITES"
-
-          # Check for HTTPS
-          if [[ -f "$BS_PATH_DEFAULT_SITE/.htsecure" ]]; then
-            ARR_ALL_USERS_DIR_SITES_DATA[$index,is_https]="Y"
-          fi
-
-          # Add PHP version information from Apache config
-          local site_config="${BS_PATH_APACHE_SITES_ENABLED}/${BS_DEFAULT_SITE_NAME}.conf"
-          if [[ -f "$site_config" ]]; then
-            local php_version; php_version=$(grep -oP 'php\K[\d.]+(?=-(?:user\d+)?-?fpm\.sock)' "$site_config")
-
-            if [[ -z "$php_version" ]]; then
-              php_version=$default_version
-              ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]="Y"
-            else
-              ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]=$([[ "$php_version" == "$default_version" ]] && echo "Y" || echo "N")
-            fi
-            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]="$php_version"
-          else
-            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_version]="N/A"
-            ARR_ALL_USERS_DIR_SITES_DATA[$index,php_default]="N/A"
-          fi
-
-          ((index++))
-        fi
-
-      else
-        local user_sites_dir="$user_home"
-      fi
+      local user_sites_dir="$user_home"
 
       # Process additional sites for both www-data and other users
       if [[ -d "$user_sites_dir" ]]; then
