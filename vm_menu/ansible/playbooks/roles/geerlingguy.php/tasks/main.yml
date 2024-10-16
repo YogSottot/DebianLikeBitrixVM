@@ -65,6 +65,11 @@
     php_fpm_conf_path: "{{ __php_fpm_conf_path }}"
   when: php_fpm_conf_path is not defined
 
+- name: Define php_fpm_daemon_xdebug.
+  ansible.builtin.set_fact:
+    php_fpm_daemon_xdebug: "{{ __php_fpm_daemon_xdebug }}"
+  when: php_fpm_daemon_xdebug is not defined
+
 # Setup/install tasks.
 - ansible.builtin.include_tasks: setup-RedHat.yml # noqa name[missing]
   when:
@@ -84,7 +89,9 @@
 - ansible.builtin.include_tasks: configure.yml # noqa name[missing]
 - ansible.builtin.include_tasks: configure-apcu.yml # noqa name[missing]
 - ansible.builtin.include_tasks: configure-opcache.yml # noqa name[missing]
+- ansible.builtin.include_tasks: configure-fpm-override.yml # noqa name[missing]
 - ansible.builtin.include_tasks: configure-fpm.yml # noqa name[missing]
+- ansible.builtin.include_tasks: configure-fpm-xdebug.yml # noqa name[missing]
 
 # Setup alterantives
 - name: Setup alterantives

@@ -60,6 +60,7 @@ action_create_site(){
 
   php_version=${new_version_php} \
   php_current_default_version=${default_version} \
+  php_enable_php_fpm_xdebug=$((php_enable_php_fpm_xdebug == 1)) \
   server_timezone=${BS_SERVER_TIMEZONE} \
 
   ansible_run_playbooks_params=${BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS}"
@@ -111,6 +112,7 @@ action_edit_site(){
 
   php_version=${new_version_php} \
   php_current_default_version=${default_version} \
+  php_enable_php_fpm_xdebug=$((php_enable_php_fpm_xdebug == 1)) \
   server_timezone=${BS_SERVER_TIMEZONE} \
 
   ansible_run_playbooks_params=${BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS}"

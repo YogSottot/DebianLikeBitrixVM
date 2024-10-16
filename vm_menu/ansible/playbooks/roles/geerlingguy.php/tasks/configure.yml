@@ -20,6 +20,20 @@
   notify: restart webserver
   when: php_use_managed_ini
 
+- name: Find all xdebug.ini files with pattern *-xdebug.ini
+  ansible.builtin.find:
+    paths: "{{ php_extension_conf_paths }}"
+    patterns: "*-xdebug.ini"
+    file_type: link
+  register: xdebug_files
+
+- name: Delete found xdebug.ini files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ xdebug_files.files }}"
+  notify: restart webserver
+
 - name: Place PHP configuration file in place. # noqa name[casing]
   ansible.builtin.template:
     src: bitrixenv.ini.j2

@@ -25,6 +25,7 @@ __php_packages:
   - php{{ php_default_version_debian }}-pspell
   - php{{ php_default_version_debian }}-intl
   - php{{ php_default_version_debian }}-mysql
+  - php{{ php_default_version_debian }}-xdebug
   - php-pear
 
 __php_webserver_daemon: "apache2"
@@ -43,6 +44,7 @@ __php_extension_conf_paths:
 __php_apc_conf_filename: 20-apcu.ini
 __php_opcache_conf_filename: 10-opcache.ini
 __php_fpm_daemon: php{{ php_default_version_debian }}-fpm
+__php_fpm_daemon_xdebug: php{{ php_default_version_debian }}-fpm-xdebug
 __php_fpm_conf_path: "/etc/php/{{ php_default_version_debian }}/fpm"
 __php_fpm_pool_conf_path: "{{ __php_fpm_conf_path }}/pool.d/www.conf"
 

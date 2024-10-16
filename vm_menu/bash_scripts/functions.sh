@@ -225,6 +225,7 @@ add_site(){
     db_user=''
     db_password=$(generate_password $BS_CHAR_DB_PASSWORD)
     path_site_from_links=$BS_PATH_DEFAULT_SITE
+    php_enable_php_fpm_xdebug='N'
     new_version_php="$default_version";
 
     ssl_lets_encrypt="N";
@@ -286,6 +287,16 @@ add_site(){
             new_version_php="${new_version_php^^}"
             new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
             echo -e "\n   Selected PHP version: $new_version_php\n"
+
+          while true; do
+            read -r -p "   Do you want to use xdebug? (Y/N) [${php_enable_php_fpm_xdebug}]: " answer
+            answer=${answer:-$php_enable_php_fpm_xdebug}
+            case ${answer,,} in
+              y ) php_enable_php_fpm_xdebug=1; break;;
+              n ) php_enable_php_fpm_xdebug=0; break;;
+              * ) printf "   Please enter Y or N.\n";;
+            esac
+          done
 
             # Create unique username for each full site
               BS_USER_SERVER_SITES=$(generate_unique_username)
@@ -393,6 +404,7 @@ add_site(){
       full )
         echo "   Site user: $BS_USER_SERVER_SITES"
         echo "   Selected PHP version: $new_version_php"
+        echo "   Xdebug enabled: $php_enable_php_fpm_xdebug"
         echo "   Database name: $db_name";
         echo "   Database user: $db_user";
         echo "   Database password: $db_password";
@@ -427,6 +439,7 @@ edit_site_config(){
     domain=''
     mode=''
     path_site_from_links=''
+    php_enable_php_fpm_xdebug=false
     new_version_php="$default_version";
 
     ssl_lets_encrypt="N";
@@ -465,6 +478,16 @@ edit_site_config(){
         BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
         BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
 
+        # Xdebug
+        while true; do
+          read -r -p "   Do you want to use xdebug? (Y/N) [${php_enable_php_fpm_xdebug}]: " answer
+          answer=${answer:-$php_enable_php_fpm_xdebug}
+          case ${answer,,} in
+            y ) php_enable_php_fpm_xdebug=1; break;;
+            n ) php_enable_php_fpm_xdebug=0; break;;
+            * ) printf "   Please enter Y or N.\n";;
+          esac
+        done
 
     read_by_def "   Enter Y or N for setting SSL Let\`s Encrypt site (default: $ssl_lets_encrypt): " ssl_lets_encrypt $ssl_lets_encrypt;
     ssl_lets_encrypt="${ssl_lets_encrypt^^}"
@@ -483,6 +506,7 @@ edit_site_config(){
     echo "   Path to site: $path_site_from_links";
     echo "   Site user: $BS_USER_SERVER_SITES"
     echo "   Selected PHP version: $new_version_php"
+    echo "   Xdebug enabled: $php_enable_php_fpm_xdebug"
     echo "   SSL Let\`s Encrypt: $ssl_lets_encrypt";
 
     if [ $ssl_lets_encrypt == "Y" ]; then
@@ -667,7 +691,8 @@ function change_php_version() {
 
     php_set_manual=false
     while true; do
-      read -r -p "   Set this version of php as the default version? All sites that use the default version will be switched to this version. (Y/N): " answer
+      read -r -p "   Set this version of php as the default version? All sites that use the default version will be switched to this version. (Y/N)[${php_set_manual}]: " answer
+            answer=${answer:-$php_set_manual}
       case ${answer,,} in
         y ) php_set_manual=1; break;;
         n ) php_set_manual=0; break;;

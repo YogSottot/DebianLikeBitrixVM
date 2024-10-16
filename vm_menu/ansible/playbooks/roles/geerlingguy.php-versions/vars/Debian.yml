@@ -47,6 +47,7 @@ __php_packages:
   - "php{{ php_version }}-pspell"
   - "php{{ php_version }}-intl"
   - "php{{ php_version }}-mysql"
+  - "php{{ php_version }}-xdebug"
   - "php-pear"
 
 php_versions_debian:
