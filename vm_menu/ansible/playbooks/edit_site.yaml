@@ -1,5 +1,5 @@
 ---
-- name: "Editing of the site {{ domain }}"
+- name: Editing of the site {{ domain }}
   hosts: localhost
   connection: local
   become: true
@@ -52,3 +52,21 @@
             pool_php_flag_display_errors: "{{ php_fpm_php_flag_display_errors }}"
             pool_php_admin_value_error_log: "{{ php_fpm_php_admin_value_error_log }}"
             pool_php_admin_flag_log_errors: "{{ php_fpm_php_admin_flag_log_errors }}"
+      when:
+        - user_server_sites != "www-data"
+
+  post_tasks:
+    - name: Reload php-fpm
+      ansible.builtin.service:
+        name: "php{{ php_version }}-fpm"
+        state: reloaded
+        enabled: true
+        daemon_reload: true
+      when: not php_enable_php_fpm_xdebug | bool
+    - name: Reload php-fpm-xdebug
+      ansible.builtin.service:
+        name: "php{{ php_version }}-fpm-xdebug"
+        state: reloaded
+        enabled: true
+        daemon_reload: true
+      when: php_enable_php_fpm_xdebug | bool

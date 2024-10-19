@@ -691,7 +691,7 @@ function change_php_version() {
 
     php_set_manual=false
     while true; do
-      read -r -p "   Set this version of php as the default version? All sites that use the default version will be switched to this version. (Y/N)[${php_set_manual}]: " answer
+      read -r -p "   Set this version of php as the default version? All sites on www-data that use the default version will be switched to this version. (Y/N)[${php_set_manual}]: " answer
             answer=${answer:-$php_set_manual}
       case ${answer,,} in
         y ) php_set_manual=1; break;;

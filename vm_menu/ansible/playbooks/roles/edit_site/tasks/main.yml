@@ -29,6 +29,7 @@
     group_user_site: "{{ group_user_server_sites }}"
     logs_path_dir: "{{ bx_cron_logs_path_dir }}"
     logs_path_file: "{{ bx_cron_logs_path_file }}"
+  when: mode == "full"
 
 ############## NGINX ##############
 - name: Get Nginx version

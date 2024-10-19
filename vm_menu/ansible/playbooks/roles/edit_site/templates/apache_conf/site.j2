@@ -82,12 +82,34 @@ LogLevel warn
 		AddType text/plain php,php3,php4,php5,php6,phtml,pl,asp,aspx,cgi,dll,exe,ico,shtm,shtml,fcg,fcgi,fpl,asmx,pht
 	</Directory>
 
-{% if php_version != php_current_default_version and user_server_sites in ['www-data', 'bitrix'] %}
+
+{% if php_version == php_current_default_version and user_server_sites in ['www-data'] %}
+
+    {% if php_enable_php_fpm_xdebug | bool %}
 	# Cause the PHP interpreter to handle files with a .php extension.
 	<FilesMatch "\.php$">
-		SetHandler "proxy:unix:{{ php_fpm_listen }}|fcgi://localhost"
+		SetHandler "proxy:unix:/run/php/php{{ php_default_version_debian }}-fpm.sock-xdebug|fcgi://localhost"
 	</FilesMatch>
+	{% endif %}
+
 {% endif %}
+
+{% if php_version != php_current_default_version and user_server_sites in ['www-data'] %}
+
+    {% if not php_enable_php_fpm_xdebug | bool %}
+	# Cause the PHP interpreter to handle files with a .php extension.
+	<FilesMatch "\.php$">
+		SetHandler "proxy:unix:/run/php/php{{ php_default_version_debian }}-fpm.sock|fcgi://localhost"
+	</FilesMatch>
+    {% else %}
+	# Cause the PHP interpreter to handle files with a .php extension.
+	<FilesMatch "\.php$">
+		SetHandler "proxy:unix:/run/php/php{{ php_default_version_debian }}-fpm.sock-xdebug|fcgi://localhost"
+	</FilesMatch>
+	{% endif %}
+
+{% endif %}
+
 {% if user_server_sites not in ['www-data'] %}
 
 	{% if not php_enable_php_fpm_xdebug | bool %}
@@ -103,5 +125,7 @@ LogLevel warn
 	{% endif %}
 
 {% endif %}
+
+
 
 </VirtualHost>
