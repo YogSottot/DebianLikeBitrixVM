@@ -277,6 +277,15 @@ add_site(){
 
         extract_username_from_path
 
+        while true; do
+          read -r -p "   Do you want to use xdebug? (Y/N) [${php_enable_php_fpm_xdebug}]: " answer
+          answer=${answer:-$php_enable_php_fpm_xdebug}
+          case ${answer,,} in
+            y ) php_enable_php_fpm_xdebug=1; break;;
+            n ) php_enable_php_fpm_xdebug=0; break;;
+            * ) printf "   Please enter Y or N.\n";;
+          esac
+        done
       ;;
       full )
           # Choose php version for site
@@ -400,6 +409,7 @@ add_site(){
     case $mode in
       link )
         echo "   Path to links site: $path_site_from_links";
+        echo "   Xdebug enabled: $php_enable_php_fpm_xdebug"
       ;;
       full )
         echo "   Site user: $BS_USER_SERVER_SITES"
