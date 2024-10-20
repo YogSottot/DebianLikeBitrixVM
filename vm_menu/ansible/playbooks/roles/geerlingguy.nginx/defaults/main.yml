@@ -11,7 +11,7 @@ nginx_ppa_version: stable
 
 # The name of the nginx package to install.
 nginx_package_name: "nginx"
-nginx_package_name_debian: "nginx-light"
+nginx_package_name_debian: "nginx"
 
 nginx_additional_package_name_debian:
   - libnginx-mod-http-brotli-filter
