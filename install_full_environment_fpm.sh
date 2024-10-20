@@ -167,7 +167,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
 
 # Full enviroment
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_INSTALL_NEW_FULL_ENVIRONMENT}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
-  -e "domain=default \
+  -e "domain=${BS_DEFAULT_SITE_NAME} \
 
   db_name=${DB_NAME} \
   db_user=${DB_USER} \

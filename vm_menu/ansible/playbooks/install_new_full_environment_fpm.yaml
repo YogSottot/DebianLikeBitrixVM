@@ -152,15 +152,6 @@
         group: "{{ group_user_server_sites }}"
         mode: "{{ permissions_sites_files }}"
 
-    ############## Systemd ##############
-#    - name: Setup PHP settings
-#      ansible.builtin.include_role:
-#        name: systemd-overrides
-
-    ############## NGINX ##############
-#    - name: Generate ssl-cert and dhparam
-#      ansible.builtin.include_tasks: "tasks/ssl_selfsigned.yaml"
-
     - name: Get Nginx version
       ansible.builtin.command: nginx -v
       register: nginx_version_output
@@ -188,7 +179,7 @@
 
     - name: Adding Nginx configuration file
       ansible.builtin.template:
-        dest: "{{ path_nginx_sites_conf }}/default.conf"
+        dest: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
         src: "roles/create_site/templates/nginx_conf/default.j2"
         owner: root
         group: root
@@ -196,8 +187,8 @@
 
     - name: Creating symbol link (site_enable) for Nginx configuration file
       ansible.builtin.file:
-        src: "{{ path_nginx_sites_conf }}/default.conf"
-        dest: "{{ path_nginx_sites_enabled }}/{{ default_site_name }}.conf"
+        src: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
+        dest: "{{ path_nginx_sites_enabled }}/{{ domain }}.conf"
         state: link
 
     - name: Creating symbol link for Nginx rtc configuration file
@@ -231,7 +222,7 @@
     ############## APACHE ##############
     - name: Adding Apache configuration file
       ansible.builtin.template:
-        dest: "{{ path_apache_sites_conf }}/default.conf"
+        dest: "{{ path_apache_sites_conf }}/{{ domain }}.conf"
         src: "roles/create_site/templates/apache_conf/default.j2"
         owner: root
         group: root
@@ -239,8 +230,8 @@
 
     - name: Creating symbol link (site_enable) for Apache configuration file
       ansible.builtin.file:
-        src: "{{ path_apache_sites_conf }}/default.conf"
-        dest: "{{ path_apache_sites_enabled }}/{{ default_site_name }}.conf"
+        src: "{{ path_apache_sites_conf }}/{{ domain }}.conf"
+        dest: "{{ path_apache_sites_enabled }}/{{ domain }}.conf"
         state: link
 
     - name: Restarting Apache
@@ -253,54 +244,41 @@
       ansible.builtin.include_role:
         name: tmpfiles
 
-    ############## MySQL ##############
-#    - name: Setup MySQL settings
-#      ansible.builtin.include_role:
-#        name: geerlingguy.mysql
-
 # Change site user for connection SSH
     - name: Installing of python3-passlib
       ansible.builtin.apt:
         name: python3-passlib
         state: present
 
-    - name: Creating home directory for user {{ user_server_sites }}
-      ansible.builtin.file:
-        path: "/home/{{ user_server_sites }}"
-        state: directory
-        owner: "{{ user_server_sites }}"
-        group: "{{ group_user_server_sites }}"
-        mode: '0755'
-
     - name: Creating directory .ssh
       ansible.builtin.file:
-        path: "/home/{{ user_server_sites }}/.ssh"
+        path: "{{ path_sites }}/.ssh"
         state: directory
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         mode: '0700'
 
     - name: Generating SSH key
-      ansible.builtin.command: ssh-keygen -t ed25519 -b 2048 -f "/home/{{ user_server_sites }}/.ssh/id_ed25519" -N ''
+      ansible.builtin.command: ssh-keygen -t ed25519 -b 2048 -f "{{ path_sites }}/.ssh/id_ed25519" -N ''
       args:
-        creates: "/home/{{ user_server_sites }}/.ssh/id_ed25519"
+        creates: "{{ path_sites }}/.ssh/id_ed25519"
 
-    - name: Copying public key in authorized_keys
-      ansible.builtin.copy:
-        src: "/home/{{ user_server_sites }}/.ssh/id_ed25519.pub"
-        dest: "/home/{{ user_server_sites }}/.ssh/authorized_keys"
+    - name: Creating file authorized_keys
+      ansible.builtin.file:
+        path: "{{ path_sites }}/.ssh/authorized_keys"
+        state: touch
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         mode: '0600'
 
     - name: Change the rights to the directory
       ansible.builtin.file:
-        path: "/home/{{ user_server_sites }}"
+        path: "{{ path_sites }}"
         owner: "{{ user_server_sites }}"
         group: "{{ group_user_server_sites }}"
         recurse: true
 
-    - name: Change user {{ user_server_sites }} for connecting SSH
+    - name: Change user for connecting SSH {{ user_server_sites }}
       ansible.builtin.lineinfile:
         path: /etc/passwd
         regexp: "^{{ user_server_sites }}:"
@@ -311,15 +289,3 @@
       ansible.builtin.user:
         name: "{{ user_server_sites }}"
         password: "{{ site_user_password | password_hash('sha512', 'passlib') }}"
-
-    - name: Link creating
-      ansible.builtin.file:
-        src: "/home/{{ user_server_sites }}/.ssh"
-        dest: "{{ path_sites }}/.ssh"
-        state: link
-
-    - ansible.builtin.include_tasks: "tasks/change_owner_and_group_symbolic_links.yaml"
-      vars:
-        path_links:
-          - ".ssh"
-        full_path: "{{ path_sites }}"
