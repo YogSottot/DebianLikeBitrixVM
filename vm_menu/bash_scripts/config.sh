@@ -81,6 +81,8 @@ BS_ANSIBLE_PB_SETUP_REPOS="setup_repos.yaml"
 BS_ANSIBLE_PB_SETUP_BASHRC="setup_bashrc.yaml"
 BS_ANSIBLE_PB_SETUP_POSTFIX="setup_postfix.yaml"
 BS_ANSIBLE_PB_EDIT_SITE="edit_site.yaml"
+BS_ANSIBLE_PB_NGINX_MOD_REPO="setup_nginx_modules_repo.yaml"
+BS_ANSIBLE_PB_SYSCTL="setup_sysctl.yaml"
 
 # Data Base
 BS_MAX_CHAR_DB_NAME=20
@@ -139,3 +141,5 @@ BS_EMAIL_ADMIN_FOR_NOTIFY=""
 
 # Install bash_aliases и liquidprompt
 BS_INSTALL_BASH_ALIASES=N
+# Apply syctl / ulimits settings (Y/N)
+BS_OPTIMIZE_SYSCTL=N

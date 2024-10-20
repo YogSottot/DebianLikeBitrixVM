@@ -31,8 +31,16 @@
     provider: selfsigned
     force: false
 
-- name: Generate X bit dhparam.pem file (this may take a while)
-  community.crypto.openssl_dhparam:
-    path: "/etc/{{ service_nginx_name }}/ssl/dhparam.pem"
-    size: 2048
-    force: false
+#- name: Generate X bit dhparam.pem file (this may take a while)
+#  community.crypto.openssl_dhparam:
+#    path: "/etc/{{ service_nginx_name }}/ssl/dhparam.pem"
+#    size: 2048
+#    force: false
+
+- name: Get dhparam.pem file
+  ansible.builtin.get_url:
+    url: https://ssl-config.mozilla.org/ffdhe2048.txt
+    dest: "/etc/{{ service_nginx_name }}/ssl/dhparam.pem"
+    owner: root
+    group: root
+    mode: "0644"

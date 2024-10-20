@@ -1,0 +1,11 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: ansible-role-sysctl
+      sysctl_items:
+        - name: net.ipv4.ip_forward
+          value: 1

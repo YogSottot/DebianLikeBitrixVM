@@ -102,6 +102,11 @@ if [ "$BS_INSTALL_BASH_ALIASES" == Y  ]; then
     path_sites=${BS_PATH_SITES} "
 fi
 
+if [ "$BS_OPTIMIZE_SYSCTL" == Y  ]; then
+  # setup sysctl
+  ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SYSCTL}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS"
+fi
+
 # setup postfix
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SETUP_POSTFIX}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS"
 
@@ -152,6 +157,9 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   push_server_config=${BS_PUSH_SERVER_CONFIG} \
   php_version=${BX_PHP_DEFAULT_VERSION} \
   server_timezone=${BS_SERVER_TIMEZONE}"
+
+# setup nginx modules repo
+ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_NGINX_MOD_REPO}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS"
 
 # SMTP
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SETTINGS_SMTP_SITES}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
@@ -209,7 +217,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   bx_cron_logs_path_file=${BS_BX_CRON_LOGS_PATH_FILE} \
 
   push_server_config=${BS_PUSH_SERVER_CONFIG} \
-  
+
   php_version=${BX_PHP_DEFAULT_VERSION} \
   php_current_default_version=${BX_PHP_DEFAULT_VERSION} \
   server_timezone=${BS_SERVER_TIMEZONE}"
