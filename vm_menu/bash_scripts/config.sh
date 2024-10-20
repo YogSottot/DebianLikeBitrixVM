@@ -136,3 +136,6 @@ BS_PUSH_SERVER_CONFIG=/etc/default/push-server-multi
 BS_PUSH_SERVER_STOPPED=false
 # Email for let's encrypt and others (rkhunter / maldet / imunify360 / etc)
 BS_EMAIL_ADMIN_FOR_NOTIFY=""
+
+# Install bash_aliases и liquidprompt
+BS_INSTALL_BASH_ALIASES=N

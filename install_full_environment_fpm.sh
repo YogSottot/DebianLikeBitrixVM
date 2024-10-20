@@ -94,11 +94,13 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
 # install deps
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_INSTALL_DEPS}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS"
 
-# setup bashrc
-ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SETUP_BASHRC}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
-  -e "user_server_sites=${BS_USER_SERVER_SITES} \
-  group_user_server_sites=${BS_GROUP_USER_SERVER_SITES} \
-  path_sites=${BS_PATH_SITES} "
+if [ "$BS_INSTALL_BASH_ALIASES" == Y  ]; then
+  # setup bashrc
+  ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SETUP_BASHRC}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
+    -e "user_server_sites=${BS_USER_SERVER_SITES} \
+    group_user_server_sites=${BS_GROUP_USER_SERVER_SITES} \
+    path_sites=${BS_PATH_SITES} "
+fi
 
 # setup postfix
 ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_SETUP_POSTFIX}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS"
@@ -177,6 +179,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
 
   path_sites=${BS_PATH_SITES} \
   document_root=${DOCUMENT_ROOT} \
+  default_site_name=${BS_DEFAULT_SITE_NAME} \
 
   delete_files=$(IFS=,; echo "${DELETE_FILES[*]}") \
 
@@ -225,11 +228,14 @@ sed -i -e 's/#SystemMaxUse=/SystemMaxUse=100M/g' /etc/systemd/journald.conf
 sed -i -e 's/#RuntimeMaxUse=/RuntimeMaxUse=100M/g' /etc/systemd/journald.conf
 systemctl restart systemd-journald
 
-if [ "$BS_PUSH_SERVER_STOPPED" == true  ]; then
+if [ "$BS_PUSH_SERVER_STOPPED" == Y  ]; then
   systemctl stop push-server.service
   systemctl disable push-server.service
   systemctl stop redis.service
   systemctl disable redis.service
+else
+  systemctl restart push-server.service
+  systemctl restart redis.service
 fi
 
 echo -e "\n\n";

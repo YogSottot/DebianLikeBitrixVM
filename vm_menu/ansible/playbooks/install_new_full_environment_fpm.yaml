@@ -197,7 +197,7 @@
     - name: Creating symbol link (site_enable) for Nginx configuration file
       ansible.builtin.file:
         src: "{{ path_nginx_sites_conf }}/default.conf"
-        dest: "{{ path_nginx_sites_enabled }}/default.conf"
+        dest: "{{ path_nginx_sites_enabled }}/{{ default_site_name }}.conf"
         state: link
 
     - name: Creating symbol link for Nginx rtc configuration file
@@ -240,7 +240,7 @@
     - name: Creating symbol link (site_enable) for Apache configuration file
       ansible.builtin.file:
         src: "{{ path_apache_sites_conf }}/default.conf"
-        dest: "{{ path_apache_sites_enabled }}/bx-site.conf"
+        dest: "{{ path_apache_sites_enabled }}/{{ default_site_name }}.conf"
         state: link
 
     - name: Restarting Apache
