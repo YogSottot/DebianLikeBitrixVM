@@ -101,3 +101,5 @@ nginx_conf_main_directory: "/etc/nginx/"
 nginx_vhost_path_enabled: "/etc/nginx/bx/site_enabled/"
 
 nginx_vhosts: []
+
+php_default_version_debian: "{{ php_version }}"
