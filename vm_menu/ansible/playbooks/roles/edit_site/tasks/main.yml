@@ -55,10 +55,11 @@
     dest: "{{ path_nginx_sites_enabled }}/{{ domain }}.conf"
     state: link
 
-- name: Restarting Nginx
+- name: Reloading Nginx
   ansible.builtin.systemd:
     name: "{{ service_nginx_name }}"
     state: reloaded
+    enabled: true
 
 ############## APACHE ##############
 - name: Adding Apache configuration file
@@ -75,7 +76,9 @@
     dest: "{{ path_apache_sites_enabled }}/{{ domain }}.conf"
     state: link
 
-- name: Restarting Apache
+- name: Reloading Apache
   ansible.builtin.systemd:
     name: "{{ service_apache_name }}"
     state: reloaded
+    enabled: true
+  when: htaccess_support | bool

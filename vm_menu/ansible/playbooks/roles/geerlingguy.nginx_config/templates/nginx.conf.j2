@@ -34,8 +34,8 @@ http {
 
 	log_format debug {{ nginx_log_format_debug }};
 
-	proxy_redirect ~^(http://[^:]+):\d+(/.+)$ $1$2;
-    proxy_redirect ~^(https://[^:]+):\d+(/.+)$ $1$2;
+	#proxy_redirect ~^(http://[^:]+):\d+(/.+)$ $1$2;
+    #proxy_redirect ~^(https://[^:]+):\d+(/.+)$ $1$2;
 
     # upload default maps
     include bx/maps/*.conf;

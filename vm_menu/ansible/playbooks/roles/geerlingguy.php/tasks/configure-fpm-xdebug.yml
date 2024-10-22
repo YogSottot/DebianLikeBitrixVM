@@ -49,5 +49,6 @@
   ansible.builtin.service:
     name: "{{ php_fpm_daemon_xdebug }}"
     state: "{{ php_fpm_handler_state }}"
+    enabled: "{{ php_fpm_enabled_on_boot }}"
   when:
     - php_enable_php_fpm_xdebug | bool

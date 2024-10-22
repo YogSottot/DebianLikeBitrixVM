@@ -225,7 +225,14 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
 
 # disable httpd access logs
 find /etc/apache2/ -type f -print0 | xargs -0 sed -i 's/CustomLog/#CustomLog/g'
-systemctl restart apache2.service
+
+if [ "$BS_HTACCESS_SUPPORT" == N  ]; then
+  systemctl stop apache2.service
+  systemctl disable apache2.service
+else
+  systemctl restart apache2.service
+fi
+
 # fix services
 systemctl restart php"${BX_PHP_DEFAULT_VERSION}"-fpm.service
 systemctl restart postfix@-.service
@@ -240,11 +247,11 @@ systemctl restart systemd-journald
 if [ "$BS_PUSH_SERVER_STOPPED" == Y  ]; then
   systemctl stop push-server.service
   systemctl disable push-server.service
-  systemctl stop redis.service
-  systemctl disable redis.service
+  systemctl stop redis-server.service
+  systemctl disable redis-server.service
 else
   systemctl restart push-server.service
-  systemctl restart redis.service
+  systemctl restart redis-server.service
 fi
 
 echo -e "\n\n";
