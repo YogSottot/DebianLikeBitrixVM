@@ -26,7 +26,7 @@
     day: "*"
     month: "*"
     weekday: "*"
-    job: "test -f {{ path_file_run_cron }} && {{ php_cron }} -f {{ path_file_run_cron }} > {{ logs_path_dir }}/site_{{ domain }}_{{ logs_path_file }} 2>&1"
+    job: "/usr/bin/test -f {{ path_file_run_cron }} && /usr/bin/{{ php_cron }} -f {{ path_file_run_cron }} > {{ logs_path_dir }}/site_{{ domain }}_{{ logs_path_file }} 2>&1"
     user: "{{ user_site }}"
     cron_file: "bx_agent_{{ db_name }}"
 
@@ -38,7 +38,7 @@
     day: "*"
     month: "*"
     weekday: "*"
-    job: "test -f {{ document_root }}/bitrix/tools/imopenlines/agents.php && {{ php_cron }} -f {{ document_root }}/bitrix/tools/imopenlines/agents.php > /dev/null 2>&1"
+    job: "/usr/bin/test -f {{ document_root }}/bitrix/tools/imopenlines/agents.php && /usr/bin/{{ php_cron }} -f {{ document_root }}/bitrix/tools/imopenlines/agents.php > /dev/null 2>&1"
     user: "{{ user_site }}"
     cron_file: "bx_agent_{{ db_name }}"
 
@@ -50,7 +50,7 @@
     day: "*"
     month: "*"
     weekday: "*"
-    job: "test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/optimize.php && {{ php_cron }} -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/optimize.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_optimize.log 2>&1"
+    job: "/usr/bin/test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/optimize.php && /usr/bin/{{ php_cron }} -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/optimize.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_optimize.log 2>&1"
     user: "{{ user_site }}"
     cron_file: "bx_agent_{{ db_name }}"
 
@@ -62,7 +62,7 @@
     day: "*"
     month: "*"
     weekday: "*"
-    job: "test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/convert.php && {{ php_cron }} -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/convert.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_convert.log 2>&1"
+    job: "/usr/bin/test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/convert.php && /usr/bin/{{ php_cron }} -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/convert.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_convert.log 2>&1"
     user: "{{ user_site }}"
     cron_file: "bx_agent_{{ db_name }}"
 
@@ -74,6 +74,6 @@
     day: "*"
     month: "*"
     weekday: "*"
-    job: "test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/cache-delayed-delete.php && {{ php_cron }} -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/cache-delayed-delete.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_cache_clean.log 2>&1"
+    job: "/usr/bin/test -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/cache-delayed-delete.php && /usr/bin/{{ php_cron }} -f {{ document_root }}/bitrix/modules/dev2fun.imagecompress/console/cache-delayed-delete.php > {{ logs_path_dir }}/site_{{ domain }}_dev2fun_cache_clean.log 2>&1"
     user: "{{ user_site }}"
     cron_file: "bx_agent_{{ db_name }}"

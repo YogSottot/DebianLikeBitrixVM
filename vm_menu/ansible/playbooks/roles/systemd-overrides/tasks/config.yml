@@ -29,6 +29,16 @@
   register: systemd_overrides_config_changed
   notify: Daemon_reload
 
+- name: Ensure configuration
+  ansible.builtin.template:
+    dest: "{{ systemd_overrides_config_file_path }}/redis-server.service.d/z_override.conf"
+    src: redis_override.conf.j2
+    owner: root
+    group: root
+    mode: "0644"
+  register: systemd_overrides_config_changed
+  notify: Daemon_reload
+
 - name: Ensure configuration path exist
   ansible.builtin.file:
     dest: "{{ systemd_overrides_config_file_path }}/systemd-tmpfiles-clean.timer.d/"

@@ -12,6 +12,7 @@ systemd_overrides_unit:
    - php{{ php_default_version_debian }}-fpm
    - php{{ php_default_version_debian }}-fpm-xdebug
    - redis
+   - redis-server
    - transformer
    - unattended-upgrades
 
