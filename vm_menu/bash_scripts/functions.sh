@@ -389,7 +389,7 @@ add_site(){
     esac
 
     while true; do
-      read -r -p "   Do you want htaccess support? (Y/N) [${htaccess_support}]: " answer
+      read -r -p "   Do you want htaccess support? (Y/N) [default: ${htaccess_support}]: " answer
       answer=${answer:-$htaccess_support}
       case ${answer,,} in
         y ) htaccess_support=1; break;;
@@ -507,7 +507,7 @@ edit_site_config(){
 
         # Htaccess
         while true; do
-          read -r -p "   Do you want htaccess support? (Y/N) [${htaccess_support}]: " answer
+          read -r -p "   Do you want htaccess support? (Y/N) [default: ${htaccess_support}]: " answer
           answer=${answer:-$htaccess_support}
           case ${answer,,} in
             y ) htaccess_support=1; break;;
