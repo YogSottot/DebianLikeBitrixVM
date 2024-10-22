@@ -207,8 +207,16 @@
 
     - name: Adding Nginx site_settings file
       ansible.builtin.template:
-        dest: "{{ path_nginx }}/site_settings/{{ domain }}/bx_temp.conf"
         src: "roles/create_site/templates/nginx_conf/bx_temp.j2"
+        dest: "{{ path_nginx }}/site_settings/{{ domain }}/bx_temp.conf"
+        owner: root
+        group: root
+        mode: '644'
+
+    - name: Copying default configs to site_settings
+      ansible.builtin.copy:
+        src: "nginx_files/custom_conf.d/site_settings/default/"
+        dest: "{{ path_nginx }}/site_settings/{{ domain }}/"
         owner: root
         group: root
         mode: '644'

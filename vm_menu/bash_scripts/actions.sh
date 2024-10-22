@@ -131,6 +131,7 @@ action_get_lets_encrypt_certificate(){
 
   default_full_path_site=${BS_PATH_SITES}/${BS_DEFAULT_SITE_NAME} \
   path_nginx_sites_conf=${BS_PATH_NGINX_SITES_CONF} \
+  path_nginx=${BS_PATH_NGINX} \
   service_nginx_name=${BS_SERVICE_NGINX_NAME} \
 
   user_server_sites=${BS_USER_SERVER_SITES} \

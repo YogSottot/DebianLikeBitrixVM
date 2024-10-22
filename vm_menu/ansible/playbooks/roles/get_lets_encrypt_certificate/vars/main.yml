@@ -4,7 +4,7 @@ letsencrypt_live_dir: /etc/letsencrypt/live
 file_fullchain: fullchain.pem
 file_privkey: privkey.pem
 file_chain: chain.pem
-nginx_config: "default.conf"
+nginx_config: "default"
 ssl_cert_full_path: ""
 ssl_cert_key_full_path: ""
 ssl_trusted_certificate_full_path: ""

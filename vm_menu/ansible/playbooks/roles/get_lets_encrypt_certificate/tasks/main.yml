@@ -24,12 +24,12 @@
 
 - name: Checking is default site
   ansible.builtin.set_fact:
-    nginx_config: "{{ domain }}.conf"
+    nginx_config: "{{ domain }}"
   when: default_full_path_site != path_site
 
 - name: Checking Nginx configuration file
   ansible.builtin.stat:
-    path: "{{ path_nginx_sites_conf }}/{{ nginx_config }}"
+    path: "{{ path_nginx }}/site_settings/{{ nginx_config }}/ssl.conf"
   register: real_nginx_config_file
 
 - name: Changing Nginx configuration
@@ -43,7 +43,7 @@
     - name: Loading Nginx configuration
       when: cert_full_domain_directory != "" and real_nginx_config_file.stat.exists
       ansible.builtin.slurp:
-        src: "{{ path_nginx_sites_conf }}/{{ nginx_config }}"
+        src: "{{ path_nginx }}/site_settings/{{ nginx_config }}/ssl.conf"
       register: nginx_conf_data
 
     - name: Processing Nginx configuration
@@ -79,7 +79,7 @@
     - name: Saving new Nginx configuration
       ansible.builtin.copy:
         content: "{{ new_nginx_conf }}"
-        dest: "{{ path_nginx_sites_conf }}/{{ nginx_config }}"
+        dest: "{{ path_nginx }}/site_settings/{{ nginx_config }}/ssl.conf"
         owner: root
         group: root
         mode: '644'
