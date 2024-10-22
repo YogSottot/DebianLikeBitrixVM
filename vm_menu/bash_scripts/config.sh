@@ -101,6 +101,10 @@ BS_SERVICE_NGINX_NAME="nginx"
 BS_PATH_NGINX="/etc/${BS_SERVICE_NGINX_NAME}/bx/"
 BS_PATH_NGINX_SITES_CONF="$BS_PATH_NGINX/site_avaliable"
 BS_PATH_NGINX_SITES_ENABLED="$BS_PATH_NGINX/site_enabled"
+# Set Y/N
+# Y — nginx + apache + php-fpm
+# N — nginx + php-fpm
+BS_HTACCESS_SUPPORT="Y"
 
 # Apache configs
 BS_SERVICE_APACHE_NAME="apache2"

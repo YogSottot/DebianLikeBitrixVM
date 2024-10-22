@@ -201,9 +201,6 @@ extract_username_from_path() {
         if [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/html/* ]]; then
           BS_USER_SERVER_SITES="www-data"
           BS_PATH_USER_HOME="html"
-        elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/bitrix/* ]]; then
-          BS_USER_SERVER_SITES="bitrix"
-          BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
         elif [[ "${path_site_from_links}" == $BS_PATH_USER_HOME_PREFIX/user*/* ]]; then
           BS_USER_SERVER_SITES=$(echo "${path_site_from_links}" | cut -d'/' -f4)
           BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
@@ -227,6 +224,7 @@ add_site(){
     path_site_from_links=$BS_PATH_DEFAULT_SITE
     php_enable_php_fpm_xdebug='N'
     new_version_php="$default_version";
+    htaccess_support=${BS_HTACCESS_SUPPORT};
 
     ssl_lets_encrypt="N";
     ssl_lets_encrypt_www="Y";
@@ -390,6 +388,16 @@ add_site(){
       ;;
     esac
 
+    while true; do
+      read -r -p "   Do you want htaccess support? (Y/N) [${htaccess_support}]: " answer
+      answer=${answer:-$htaccess_support}
+      case ${answer,,} in
+        y ) htaccess_support=1; break;;
+        n ) htaccess_support=0; break;;
+        * ) printf "   Please enter Y or N.\n";;
+      esac
+    done
+
     read_by_def "   Enter Y or N for setting SSL Let\`s Encrypt site (default: $ssl_lets_encrypt): " ssl_lets_encrypt $ssl_lets_encrypt;
     ssl_lets_encrypt="${ssl_lets_encrypt^^}"
 
@@ -422,6 +430,7 @@ add_site(){
     esac
 
     echo "   SSL Let\`s Encrypt: $ssl_lets_encrypt";
+    echo "   Htaccess support: $htaccess_support";
 
     if [ $ssl_lets_encrypt == "Y" ]; then
         echo "   Get a certificate for WWW: $ssl_lets_encrypt_www"
@@ -449,8 +458,9 @@ edit_site_config(){
     domain=''
     mode=''
     path_site_from_links=''
-    php_enable_php_fpm_xdebug=false
+    php_enable_php_fpm_xdebug='N'
     new_version_php="$default_version";
+    htaccess_support=${BS_HTACCESS_SUPPORT};
 
     ssl_lets_encrypt="N";
     ssl_lets_encrypt_www="Y";
@@ -459,7 +469,7 @@ edit_site_config(){
 
     echo -e "\n   Menu -> Edit site:\n";
     while [[ ! -d "$path_site_from_links" ]]; do
-      read_by_def "   Enter existing path to site (example: ${BS_PATH_DEFAULT_SITE}): " path_site_from_links "${BS_PATH_DEFAULT_SITE}";
+      read_by_def "   Enter existing path to site (default: ${BS_PATH_DEFAULT_SITE}): " path_site_from_links "${BS_PATH_DEFAULT_SITE}";
       if [ ! -d "$path_site_from_links" ]; then
         echo "   Incorrect site dir! Please enter site dir";
       fi
@@ -484,10 +494,6 @@ edit_site_config(){
           new_version_php=$(echo "$new_version_php" | sed -e 's/PHP//')
           echo -e "\n   Selected PHP version: $new_version_php\n"
 
-        BS_GROUP_USER_SERVER_SITES="${BS_USER_SERVER_SITES}"
-        BS_PATH_USER_HOME="${BS_USER_SERVER_SITES}"
-        BS_PATH_SITES="${BS_PATH_USER_HOME_PREFIX}/${BS_PATH_USER_HOME}"
-
         # Xdebug
         while true; do
           read -r -p "   Do you want to use xdebug? (Y/N) [${php_enable_php_fpm_xdebug}]: " answer
@@ -495,6 +501,17 @@ edit_site_config(){
           case ${answer,,} in
             y ) php_enable_php_fpm_xdebug=1; break;;
             n ) php_enable_php_fpm_xdebug=0; break;;
+            * ) printf "   Please enter Y or N.\n";;
+          esac
+        done
+
+        # Htaccess
+        while true; do
+          read -r -p "   Do you want htaccess support? (Y/N) [${htaccess_support}]: " answer
+          answer=${answer:-$htaccess_support}
+          case ${answer,,} in
+            y ) htaccess_support=1; break;;
+            n ) htaccess_support=0; break;;
             * ) printf "   Please enter Y or N.\n";;
           esac
         done
@@ -518,6 +535,7 @@ edit_site_config(){
     echo "   Selected PHP version: $new_version_php"
     echo "   Xdebug enabled: $php_enable_php_fpm_xdebug"
     echo "   SSL Let\`s Encrypt: $ssl_lets_encrypt";
+    echo "   Htaccess support: $htaccess_support";
 
     if [ $ssl_lets_encrypt == "Y" ]; then
         echo "   Get a certificate for WWW: $ssl_lets_encrypt_www"

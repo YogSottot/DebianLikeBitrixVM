@@ -204,6 +204,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   path_nginx=${BS_PATH_NGINX} \
   path_nginx_sites_conf=${BS_PATH_NGINX_SITES_CONF} \
   path_nginx_sites_enabled=${BS_PATH_NGINX_SITES_ENABLED} \
+  htaccess_support=${BS_HTACCESS_SUPPORT} \
 
   service_apache_name=${BS_SERVICE_APACHE_NAME} \
   path_apache=${BS_PATH_APACHE} \

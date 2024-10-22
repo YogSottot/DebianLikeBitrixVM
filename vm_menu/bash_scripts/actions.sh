@@ -42,6 +42,7 @@ action_create_site(){
   path_nginx=${BS_PATH_NGINX} \
   path_nginx_sites_conf=${BS_PATH_NGINX_SITES_CONF} \
   path_nginx_sites_enabled=${BS_PATH_NGINX_SITES_ENABLED} \
+  htaccess_support=${BS_HTACCESS_SUPPORT} \
 
   service_apache_name=${BS_SERVICE_APACHE_NAME} \
   path_apache=${BS_PATH_APACHE} \
@@ -96,6 +97,7 @@ action_edit_site(){
   path_nginx=${BS_PATH_NGINX} \
   path_nginx_sites_conf=${BS_PATH_NGINX_SITES_CONF} \
   path_nginx_sites_enabled=${BS_PATH_NGINX_SITES_ENABLED} \
+  htaccess_support=${BS_HTACCESS_SUPPORT} \
 
   service_apache_name=${BS_SERVICE_APACHE_NAME} \
   path_apache=${BS_PATH_APACHE} \
