@@ -238,6 +238,11 @@ else
   systemctl restart apache2.service
 fi
 
+# fix cloudflare ip detection
+wget https://raw.githubusercontent.com/YogSottot/DebianLikeBitrixVM/${BRANCH}/repositories/bitrix-gt/cloudflare_ip_updater.sh -N -P /etc/cron.monthly/
+chmod +x /etc/cron.monthly/cloudflare_ip_updater.sh
+/etc/cron.monthly/cloudflare_ip_updater.sh
+
 # fix services
 systemctl restart php"${BX_PHP_DEFAULT_VERSION}"-fpm.service
 systemctl restart postfix@-.service
