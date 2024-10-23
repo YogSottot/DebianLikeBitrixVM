@@ -18,7 +18,7 @@
 
     - name: Add nginx modules repo.
       ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/yogsottot.asc] https://yogsottot.github.io/ppa {{ ansible_distribution_release }} main"
+        repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/yogsottot.asc] https://yogsottot.github.io/ppa/debian {{ ansible_distribution_release }} main"
         state: present
       when:
         - ansible_os_family == "Debian"
