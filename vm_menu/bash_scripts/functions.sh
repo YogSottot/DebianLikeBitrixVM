@@ -123,7 +123,7 @@ menu_edit_sites(){
 
     echo -e "\n          Menu -> Edit site settings:\n";
     echo "          1) Add site";
-    echo "          2) Change the php version of an existing website";
+    echo "          2) Edit existing website";
     echo "          3) Delete site";
     echo "          0) Return to main menu";
     echo -e "\n\n";
@@ -466,6 +466,7 @@ edit_site_config(){
     ssl_lets_encrypt_www="Y";
     ssl_lets_encrypt_email="${BS_EMAIL_ADMIN_FOR_NOTIFY}";
     redirect_to_https="N";
+    nginx_composite="N";
 
     echo -e "\n   Menu -> Edit site:\n";
     while [[ ! -d "$path_site_from_links" ]]; do
@@ -516,6 +517,17 @@ edit_site_config(){
           esac
         done
 
+        # Composite nginx-files
+        while true; do
+          read -r -p "   Do you want ${BS_SERVICE_NGINX_NAME}-composite from files support? (Y/N) [default: ${nginx_composite}]: " answer
+          answer=${answer:-$nginx_composite}
+          case ${answer,,} in
+            y ) nginx_composite=1; break;;
+            n ) nginx_composite=0; break;;
+            * ) printf "   Please enter Y or N.\n";;
+          esac
+        done
+
     read_by_def "   Enter Y or N for setting SSL Let\`s Encrypt site (default: $ssl_lets_encrypt): " ssl_lets_encrypt $ssl_lets_encrypt;
     ssl_lets_encrypt="${ssl_lets_encrypt^^}"
 
@@ -536,6 +548,7 @@ edit_site_config(){
     echo "   Xdebug enabled: $php_enable_php_fpm_xdebug"
     echo "   SSL Let\`s Encrypt: $ssl_lets_encrypt";
     echo "   Htaccess support: $htaccess_support";
+    echo "   ${BS_SERVICE_NGINX_NAME} composite: $nginx_composite";
 
     if [ $ssl_lets_encrypt == "Y" ]; then
         echo "   Get a certificate for WWW: $ssl_lets_encrypt_www"

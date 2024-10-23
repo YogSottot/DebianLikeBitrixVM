@@ -1,3 +1,3 @@
 ---
 # defaults file for create_site
-
+nginx_composite_storage: files

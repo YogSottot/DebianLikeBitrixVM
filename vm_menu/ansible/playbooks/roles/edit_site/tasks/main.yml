@@ -22,7 +22,8 @@
   ansible.builtin.set_fact:
     db_name: "{{ db_name_result.stdout }}"
 
-- ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
+- name: Create cron tasks for agents
+  ansible.builtin.include_tasks: "tasks/add_cron_agents.yaml"
   vars:
     path_file_run_cron: "{{ path_sites }}/{{ domain }}{{ bx_cron_agents_path_file_after_document_root }}"
     user_site: "{{ user_server_sites }}"
@@ -41,6 +42,14 @@
   ansible.builtin.set_fact:
     nginx_version: "{{ nginx_version_output.stderr | regex_search('\\d+\\.\\d+\\.\\d+') }}"
 
+- name: Composite settings
+  ansible.builtin.include_tasks: "setup_composite.yml"
+  when: nginx_composite | bool
+
+- name: Composite settings
+  ansible.builtin.include_tasks: "delete_composite.yml"
+  when: not nginx_composite | bool
+
 - name: Adding Nginx configuration file
   ansible.builtin.template:
     dest: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
@@ -48,12 +57,15 @@
     owner: root
     group: root
     mode: '644'
+  when: not nginx_composite | bool
+  notify: "Reload {{ service_nginx_name }}"
 
 - name: Creating symbol link (site_enable) for Nginx configuration file
   ansible.builtin.file:
     src: "{{ path_nginx_sites_conf }}/{{ domain }}.conf"
     dest: "{{ path_nginx_sites_enabled }}/{{ domain }}.conf"
     state: link
+  notify: "Reload {{ service_nginx_name }}"
 
 - name: Reloading Nginx
   ansible.builtin.systemd:

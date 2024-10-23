@@ -98,6 +98,7 @@ action_edit_site(){
   path_nginx_sites_conf=${BS_PATH_NGINX_SITES_CONF} \
   path_nginx_sites_enabled=${BS_PATH_NGINX_SITES_ENABLED} \
   htaccess_support=$((htaccess_support == 1)) \
+  nginx_composite=$((nginx_composite == 1)) \
 
   service_apache_name=${BS_SERVICE_APACHE_NAME} \
   path_apache=${BS_PATH_APACHE} \
