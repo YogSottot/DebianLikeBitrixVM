@@ -138,8 +138,10 @@ BS_MYSQL_CMD="mysql"
 
 # Push-server configs
 BS_PUSH_SERVER_CONFIG=/etc/default/push-server-multi
-# Do not run push-server by default
-BS_PUSH_SERVER_STOPPED=false
+# Do not run push-server by default (Y/N)
+BS_PUSH_SERVER_STOPPED=N
+# Add to /bitrix/.settings.php config local push-server (Y/N).
+BS_PUSH_SERVER_BX_SETTINGS=Y
 # Email for let's encrypt and others (rkhunter / maldet / imunify360 / etc)
 BS_EMAIL_ADMIN_FOR_NOTIFY=""
 

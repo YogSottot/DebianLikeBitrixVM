@@ -225,6 +225,7 @@ add_site(){
     php_enable_php_fpm_xdebug='N'
     new_version_php="$default_version";
     htaccess_support=${BS_HTACCESS_SUPPORT};
+    push_server_bx_settings=${BS_PUSH_SERVER_BX_SETTINGS};
 
     ssl_lets_encrypt="N";
     ssl_lets_encrypt_www="Y";
@@ -301,6 +302,16 @@ add_site(){
             case ${answer,,} in
               y ) php_enable_php_fpm_xdebug=1; break;;
               n ) php_enable_php_fpm_xdebug=0; break;;
+              * ) printf "   Please enter Y or N.\n";;
+            esac
+          done
+
+          while true; do
+            read -r -p "   Do you want to add local push-server config to /bitrix/.setting.php? (Y/N) [${push_server_bx_settings}]: " answer
+            answer=${answer:-$push_server_bx_settings}
+            case ${answer,,} in
+              y ) push_server_bx_settings=1; break;;
+              n ) push_server_bx_settings=0; break;;
               * ) printf "   Please enter Y or N.\n";;
             esac
           done
@@ -423,6 +434,7 @@ add_site(){
         echo "   Site user: $BS_USER_SERVER_SITES"
         echo "   Selected PHP version: $new_version_php"
         echo "   Xdebug enabled: $php_enable_php_fpm_xdebug"
+        echo "   Push-server config: $push_server_bx_settings"
         echo "   Database name: $db_name";
         echo "   Database user: $db_user";
         echo "   Database password: $db_password";

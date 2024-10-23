@@ -77,6 +77,7 @@ return array(
                 ),
             'readonly' => true,
         ),
+        {% if push_server_bx_settings | bool %}
     'pull_s1' => 'BEGIN GENERATED PUSH SETTINGS. DON\'T DELETE COMMENT!!!!',
     'pull' => array(
         'value' => array(
@@ -101,4 +102,5 @@ return array(
         ),
     ),
     'pull_e1' => 'END GENERATED PUSH SETTINGS. DON\'T DELETE COMMENT!!!!',
+    {% endif %}
 );

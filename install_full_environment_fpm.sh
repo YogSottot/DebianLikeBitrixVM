@@ -221,6 +221,7 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   bx_cron_logs_path_file=${BS_BX_CRON_LOGS_PATH_FILE} \
 
   push_server_config=${BS_PUSH_SERVER_CONFIG} \
+  push_server_bx_settings=${BS_PUSH_SERVER_BX_SETTINGS} \
 
   php_version=${BX_PHP_DEFAULT_VERSION} \
   php_current_default_version=${BX_PHP_DEFAULT_VERSION} \
