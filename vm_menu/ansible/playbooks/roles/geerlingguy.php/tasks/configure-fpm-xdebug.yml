@@ -34,7 +34,7 @@
     owner: root
     group: root
     mode: "0644"
-    force: true
+    force: false
 
 - name: Ensure php-fpm is started and enabled at boot (if configured).
   ansible.builtin.service:
