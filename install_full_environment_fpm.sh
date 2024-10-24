@@ -229,6 +229,14 @@ ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_P
   php_default_version_debian=${BX_PHP_DEFAULT_VERSION} \
   server_timezone=${BS_SERVER_TIMEZONE}"
 
+if [ "$BS_INSTALL_CROWDSEC" == Y  ]; then
+  ansible-playbook "$DEST_DIR_MENU/$DIR_NAME_MENU/ansible/playbooks/${BS_ANSIBLE_PB_CROWDSEC}" "$BS_ANSIBLE_RUN_PLAYBOOKS_PARAMS" \
+  -e 'crowdsec_action="'"${action}"'" \
+      cs_parsers_mywhitelists_ip="'"$(echo "${BS_CROWDESC_WHITELIST_IP}" | sed 's/,/"\n- "/g; s/^/- "/; s/$/"/;')"'" \
+      cs_collections_list="'"$(echo "${BS_CROWDSEC_COLLECTION_INSTALL}" | sed 's/,/\n  - /g; s/^/  - /;')"'" \
+      crowdsec_enroll_key="'"${BS_CROWDSEC_ENROLL_KEY}"'"'
+fi
+
 # disable httpd access logs
 find /etc/apache2/ -type f -print0 | xargs -0 sed -i 's/CustomLog/#CustomLog/g'
 

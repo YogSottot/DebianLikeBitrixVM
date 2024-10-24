@@ -94,6 +94,7 @@ menu_install_extensions(){
     echo "          1) Install/Delete Sphinx";
     echo "          2) Install/Delete File Conversion Server (transformer)";
     echo "          3) Install/Delete Netdata";
+    echo "          4) Install/Delete Crowdsec";
     echo "          0) Return to main menu";
     echo -e "\n\n";
     echo -n "Enter command: "
@@ -104,6 +105,7 @@ menu_install_extensions(){
     "1") install_sphinx ;;
     "2") install_file_conversion_server ;;
     "3") install_netdata ;;
+    "4") install_crowdsec ;;
 
     0|z)  main_menu
     ;;
@@ -966,6 +968,27 @@ function install_file_conversion_server() {
     read -r -p "   Do you really want to$(echo -e "${action_color}")File Conversion Server (transformer)? (Y/N): " answer
     case $answer in
       [Yy]* ) action_install_or_delete_file_conversion_server; break;;
+      [Nn]* ) break;;
+      * ) echo "   Please enter Y or N.";;
+    esac
+  done
+}
+
+function install_crowdsec() {
+  clear
+
+  is_install_crowdsec=$(which crowdsec);
+  action="INSTALL"
+  if [ ! -z "$is_install_crowdsec" ]; then
+      action="DELETE"
+  fi
+
+  action_color="\e[33m ${action} \e[0m"
+
+  while true; do
+    read -r -p "   Do you really want to$(echo -e "${action_color}")Crowdsec? (Y/N): " answer
+    case $answer in
+      [Yy]* ) action_install_or_delete_crowdsec; break;;
       [Nn]* ) break;;
       * ) echo "   Please enter Y or N.";;
     esac

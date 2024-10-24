@@ -80,9 +80,28 @@ nginx_extra_http_options: |
   fastcgi_busy_buffers_size  256k;
 
 nginx_log_format_main: |-
-  '$remote_addr - $remote_user [$time_local - $upstream_response_time] '
-  '$status "$request" $body_bytes_sent '
-  '"$http_referer" "$http_user_agent" "$http_x_forwarded_for"'
+  '$remote_addr - $host [$time_local] "$request" '
+  'request_length=$request_length '
+  'status=$status bytes_sent=$bytes_sent '
+  'body_bytes_sent=$body_bytes_sent '
+  'referer=$http_referer '
+  'user_agent="$http_user_agent" '
+  'upstream_status=$upstream_status '
+  'request_time=$request_time '
+  'upstream_response_time=$upstream_response_time '
+  'upstream_connect_time=$upstream_connect_time '
+  'upstream_header_time=$upstream_header_time '
+  'http_x_forwarded_for=$http_x_forwarded_for';
+
+# default
+#  '$remote_addr - $remote_user [$time_local] "$request" '
+#  '$status $body_bytes_sent "$http_referer" "$http_user_agent" '
+#  '$request_length $request_time "$http_x_forwarded_for"';
+
+# bitrix-env
+#  '$remote_addr - $remote_user [$time_local - $upstream_response_time] '
+#  '$status "$request" $body_bytes_sent '
+#  '"$http_referer" "$http_user_agent" "$http_x_forwarded_for"'
 
 nginx_log_format_common: |-
   '$remote_addr - - [$time_local - $upstream_response_time] '
